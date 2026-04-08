@@ -1,11 +1,5 @@
 # PRANAG-AI Validation Stack
 
-This codebase now implements all pending items:
-
-- Connect real simulation data (CSV/Parquet)
-- Reduce false positives with threshold calibration (target `<5%`)
-- Build feedback loop from failed designs
-- Persist validation decisions (JSONL + SQLite)
 
 ## Files
 
