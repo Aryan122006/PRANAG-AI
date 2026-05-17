@@ -1,0 +1,11 @@
+=======================================================
+  ARYAN — PERFORMANCE REPORT
+  Generated: 2026-05-09T12:27:30
+=======================================================
+  Total traits processed : 30
+  Total time             : 4.3s
+  Average speed          : 7 traits/sec
+  Peak memory usage      : 382 MB
+  Est. time for 1M traits: 39.12 hours
+  4-hour target met      : NO - needs GPU
+=======================================================

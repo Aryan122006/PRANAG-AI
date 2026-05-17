@@ -1,0 +1,23 @@
+{
+  "summary": {
+    "total_traits": 30,
+    "total_elapsed_sec": 4.33,
+    "avg_speed_per_sec": 7.1,
+    "peak_memory_mb": 382.4,
+    "est_1M_hours": 39.12,
+    "target_4hr_met": false,
+    "batches_recorded": 1
+  },
+  "snapshots": [
+    {
+      "timestamp": "2026-05-09T12:27:30.775205",
+      "batch_num": 1,
+      "traits_processed": 30,
+      "batch_time_sec": 4.2251,
+      "traits_per_sec": 7.1,
+      "memory_mb": 382.4,
+      "cpu_percent": 0.0,
+      "cumulative_total": 30
+    }
+  ]
+}

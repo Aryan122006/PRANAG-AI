@@ -1,0 +1,2045 @@
+{
+  "report_id": "VR-20260509-122733",
+  "generated_at": "2026-05-09T12:27:33.266398",
+  "executive_summary": {
+    "total_designs": 30,
+    "passed": 30,
+    "failed": 0,
+    "pass_rate_pct": 100.0,
+    "cross_domain_passed": 0,
+    "surrogate_accuracy": "86.0%",
+    "recommended_threshold": 0.5,
+    "system_status": "NEEDS ATTENTION"
+  },
+  "top_designs": [
+    {
+      "rank": 1,
+      "design_id": "T_1590401980736",
+      "score": 0.7659,
+      "biology_score": 0.9885,
+      "materials_score": 0.6782,
+      "physics_score": 0.6545,
+      "chemistry_score": 0.6896,
+      "recommendation": "\u26a0\ufe0f  Monitor closely"
+    },
+    {
+      "rank": 2,
+      "design_id": "T_1590401837504",
+      "score": 0.7659,
+      "biology_score": 0.9885,
+      "materials_score": 0.6782,
+      "physics_score": 0.6545,
+      "chemistry_score": 0.6896,
+      "recommendation": "\u26a0\ufe0f  Monitor closely"
+    },
+    {
+      "rank": 3,
+      "design_id": "T_1590410078272",
+      "score": 0.7659,
+      "biology_score": 0.9885,
+      "materials_score": 0.6782,
+      "physics_score": 0.6545,
+      "chemistry_score": 0.6896,
+      "recommendation": "\u26a0\ufe0f  Monitor closely"
+    },
+    {
+      "rank": 4,
+      "design_id": "T_1590427643136",
+      "score": 0.7659,
+      "biology_score": 0.9885,
+      "materials_score": 0.6782,
+      "physics_score": 0.6545,
+      "chemistry_score": 0.6896,
+      "recommendation": "\u26a0\ufe0f  Monitor closely"
+    },
+    {
+      "rank": 5,
+      "design_id": "T_1590375614208",
+      "score": 0.7659,
+      "biology_score": 0.9885,
+      "materials_score": 0.6782,
+      "physics_score": 0.6545,
+      "chemistry_score": 0.6896,
+      "recommendation": "\u26a0\ufe0f  Monitor closely"
+    },
+    {
+      "rank": 6,
+      "design_id": "T_1590402905216",
+      "score": 0.7659,
+      "biology_score": 0.9885,
+      "materials_score": 0.6782,
+      "physics_score": 0.6545,
+      "chemistry_score": 0.6896,
+      "recommendation": "\u26a0\ufe0f  Monitor closely"
+    },
+    {
+      "rank": 7,
+      "design_id": "T_1590428058368",
+      "score": 0.7659,
+      "biology_score": 0.9885,
+      "materials_score": 0.6782,
+      "physics_score": 0.6545,
+      "chemistry_score": 0.6896,
+      "recommendation": "\u26a0\ufe0f  Monitor closely"
+    },
+    {
+      "rank": 8,
+      "design_id": "T_1590428058944",
+      "score": 0.7659,
+      "biology_score": 0.9885,
+      "materials_score": 0.6782,
+      "physics_score": 0.6545,
+      "chemistry_score": 0.6896,
+      "recommendation": "\u26a0\ufe0f  Monitor closely"
+    },
+    {
+      "rank": 9,
+      "design_id": "T_1590428058624",
+      "score": 0.7659,
+      "biology_score": 0.9885,
+      "materials_score": 0.6782,
+      "physics_score": 0.6545,
+      "chemistry_score": 0.6896,
+      "recommendation": "\u26a0\ufe0f  Monitor closely"
+    },
+    {
+      "rank": 10,
+      "design_id": "T_1590410263232",
+      "score": 0.7659,
+      "biology_score": 0.9885,
+      "materials_score": 0.6782,
+      "physics_score": 0.6545,
+      "chemistry_score": 0.6896,
+      "recommendation": "\u26a0\ufe0f  Monitor closely"
+    }
+  ],
+  "failure_summary": {
+    "total": 0,
+    "distribution": {},
+    "severity": {}
+  },
+  "accuracy_summary": {
+    "accuracy_pct": 86.0,
+    "false_positive_pct": 43.75,
+    "false_negative_pct": 0.0,
+    "f1_score": 0.9067,
+    "passed": false,
+    "confusion_matrix": {
+      "TP": 68,
+      "TN": 18,
+      "FP": 14,
+      "FN": 0
+    }
+  },
+  "recommendations": [
+    "Improve surrogate model training \u2014 target >97% accuracy"
+  ],
+  "suite_results": {
+    "suite_passed": false,
+    "total_tests": 7,
+    "passed_tests": 5,
+    "total_ms": 47.07,
+    "timestamp": "2026-05-09T12:27:33.260398",
+    "test_results": [
+      {
+        "name": "Core Validation",
+        "passed": 30,
+        "duration_ms": 1.18,
+        "result": {
+          "passed": 30,
+          "total": 30,
+          "failed": 0,
+          "pass_rate": 1.0,
+          "top_winners": [
+            "T_1590401980736",
+            "T_1590401837504",
+            "T_1590410078272",
+            "T_1590427643136",
+            "T_1590375614208",
+            "T_1590402905216",
+            "T_1590428058368",
+            "T_1590428058944",
+            "T_1590428058624",
+            "T_1590410263232"
+          ],
+          "results": [
+            {
+              "design_id": "T_1590401980736",
+              "passed": true,
+              "score": 0.765947,
+              "total_traits": 10,
+              "passed_traits": 7,
+              "failed_traits": 3,
+              "top_winners": [
+                "T_1590401980736",
+                "T_1590401837504",
+                "T_1590410078272",
+                "T_1590427643136",
+                "T_1590375614208",
+                "T_1590402905216",
+                "T_1590428058368",
+                "T_1590428058944",
+                "T_1590428058624",
+                "T_1590410263232"
+              ],
+              "rejection_reason": null,
+              "timestamp": "2026-05-09T12:27:33.212894"
+            },
+            {
+              "design_id": "T_1590401837504",
+              "passed": true,
+              "score": 0.765947,
+              "total_traits": 10,
+              "passed_traits": 7,
+              "failed_traits": 3,
+              "top_winners": [
+                "T_1590401980736",
+                "T_1590401837504",
+                "T_1590410078272",
+                "T_1590427643136",
+                "T_1590375614208",
+                "T_1590402905216",
+                "T_1590428058368",
+                "T_1590428058944",
+                "T_1590428058624",
+                "T_1590410263232"
+              ],
+              "rejection_reason": null,
+              "timestamp": "2026-05-09T12:27:33.212894"
+            },
+            {
+              "design_id": "T_1590410078272",
+              "passed": true,
+              "score": 0.765947,
+              "total_traits": 10,
+              "passed_traits": 7,
+              "failed_traits": 3,
+              "top_winners": [
+                "T_1590401980736",
+                "T_1590401837504",
+                "T_1590410078272",
+                "T_1590427643136",
+                "T_1590375614208",
+                "T_1590402905216",
+                "T_1590428058368",
+                "T_1590428058944",
+                "T_1590428058624",
+                "T_1590410263232"
+              ],
+              "rejection_reason": null,
+              "timestamp": "2026-05-09T12:27:33.212894"
+            },
+            {
+              "design_id": "T_1590427643136",
+              "passed": true,
+              "score": 0.765947,
+              "total_traits": 10,
+              "passed_traits": 7,
+              "failed_traits": 3,
+              "top_winners": [
+                "T_1590401980736",
+                "T_1590401837504",
+                "T_1590410078272",
+                "T_1590427643136",
+                "T_1590375614208",
+                "T_1590402905216",
+                "T_1590428058368",
+                "T_1590428058944",
+                "T_1590428058624",
+                "T_1590410263232"
+              ],
+              "rejection_reason": null,
+              "timestamp": "2026-05-09T12:27:33.212894"
+            },
+            {
+              "design_id": "T_1590375614208",
+              "passed": true,
+              "score": 0.765947,
+              "total_traits": 10,
+              "passed_traits": 7,
+              "failed_traits": 3,
+              "top_winners": [
+                "T_1590401980736",
+                "T_1590401837504",
+                "T_1590410078272",
+                "T_1590427643136",
+                "T_1590375614208",
+                "T_1590402905216",
+                "T_1590428058368",
+                "T_1590428058944",
+                "T_1590428058624",
+                "T_1590410263232"
+              ],
+              "rejection_reason": null,
+              "timestamp": "2026-05-09T12:27:33.212894"
+            },
+            {
+              "design_id": "T_1590402905216",
+              "passed": true,
+              "score": 0.765947,
+              "total_traits": 10,
+              "passed_traits": 7,
+              "failed_traits": 3,
+              "top_winners": [
+                "T_1590401980736",
+                "T_1590401837504",
+                "T_1590410078272",
+                "T_1590427643136",
+                "T_1590375614208",
+                "T_1590402905216",
+                "T_1590428058368",
+                "T_1590428058944",
+                "T_1590428058624",
+                "T_1590410263232"
+              ],
+              "rejection_reason": null,
+              "timestamp": "2026-05-09T12:27:33.212894"
+            },
+            {
+              "design_id": "T_1590428058368",
+              "passed": true,
+              "score": 0.765947,
+              "total_traits": 10,
+              "passed_traits": 7,
+              "failed_traits": 3,
+              "top_winners": [
+                "T_1590401980736",
+                "T_1590401837504",
+                "T_1590410078272",
+                "T_1590427643136",
+                "T_1590375614208",
+                "T_1590402905216",
+                "T_1590428058368",
+                "T_1590428058944",
+                "T_1590428058624",
+                "T_1590410263232"
+              ],
+              "rejection_reason": null,
+              "timestamp": "2026-05-09T12:27:33.212894"
+            },
+            {
+              "design_id": "T_1590428058944",
+              "passed": true,
+              "score": 0.765947,
+              "total_traits": 10,
+              "passed_traits": 7,
+              "failed_traits": 3,
+              "top_winners": [
+                "T_1590401980736",
+                "T_1590401837504",
+                "T_1590410078272",
+                "T_1590427643136",
+                "T_1590375614208",
+                "T_1590402905216",
+                "T_1590428058368",
+                "T_1590428058944",
+                "T_1590428058624",
+                "T_1590410263232"
+              ],
+              "rejection_reason": null,
+              "timestamp": "2026-05-09T12:27:33.212894"
+            },
+            {
+              "design_id": "T_1590428058624",
+              "passed": true,
+              "score": 0.765947,
+              "total_traits": 10,
+              "passed_traits": 7,
+              "failed_traits": 3,
+              "top_winners": [
+                "T_1590401980736",
+                "T_1590401837504",
+                "T_1590410078272",
+                "T_1590427643136",
+                "T_1590375614208",
+                "T_1590402905216",
+                "T_1590428058368",
+                "T_1590428058944",
+                "T_1590428058624",
+                "T_1590410263232"
+              ],
+              "rejection_reason": null,
+              "timestamp": "2026-05-09T12:27:33.212894"
+            },
+            {
+              "design_id": "T_1590410263232",
+              "passed": true,
+              "score": 0.765947,
+              "total_traits": 10,
+              "passed_traits": 7,
+              "failed_traits": 3,
+              "top_winners": [
+                "T_1590401980736",
+                "T_1590401837504",
+                "T_1590410078272",
+                "T_1590427643136",
+                "T_1590375614208",
+                "T_1590402905216",
+                "T_1590428058368",
+                "T_1590428058944",
+                "T_1590428058624",
+                "T_1590410263232"
+              ],
+              "rejection_reason": null,
+              "timestamp": "2026-05-09T12:27:33.212894"
+            },
+            {
+              "design_id": "T_1590428059200",
+              "passed": true,
+              "score": 0.765947,
+              "total_traits": 10,
+              "passed_traits": 7,
+              "failed_traits": 3,
+              "top_winners": [
+                "T_1590401980736",
+                "T_1590401837504",
+                "T_1590410078272",
+                "T_1590427643136",
+                "T_1590375614208",
+                "T_1590402905216",
+                "T_1590428058368",
+                "T_1590428058944",
+                "T_1590428058624",
+                "T_1590410263232"
+              ],
+              "rejection_reason": null,
+              "timestamp": "2026-05-09T12:27:33.212894"
+            },
+            {
+              "design_id": "T_1590428059776",
+              "passed": true,
+              "score": 0.765947,
+              "total_traits": 10,
+              "passed_traits": 7,
+              "failed_traits": 3,
+              "top_winners": [
+                "T_1590401980736",
+                "T_1590401837504",
+                "T_1590410078272",
+                "T_1590427643136",
+                "T_1590375614208",
+                "T_1590402905216",
+                "T_1590428058368",
+                "T_1590428058944",
+                "T_1590428058624",
+                "T_1590410263232"
+              ],
+              "rejection_reason": null,
+              "timestamp": "2026-05-09T12:27:33.212894"
+            },
+            {
+              "design_id": "T_1590428059712",
+              "passed": true,
+              "score": 0.765947,
+              "total_traits": 10,
+              "passed_traits": 7,
+              "failed_traits": 3,
+              "top_winners": [
+                "T_1590401980736",
+                "T_1590401837504",
+                "T_1590410078272",
+                "T_1590427643136",
+                "T_1590375614208",
+                "T_1590402905216",
+                "T_1590428058368",
+                "T_1590428058944",
+                "T_1590428058624",
+                "T_1590410263232"
+              ],
+              "rejection_reason": null,
+              "timestamp": "2026-05-09T12:27:33.212894"
+            },
+            {
+              "design_id": "T_1590428060288",
+              "passed": true,
+              "score": 0.765947,
+              "total_traits": 10,
+              "passed_traits": 7,
+              "failed_traits": 3,
+              "top_winners": [
+                "T_1590401980736",
+                "T_1590401837504",
+                "T_1590410078272",
+                "T_1590427643136",
+                "T_1590375614208",
+                "T_1590402905216",
+                "T_1590428058368",
+                "T_1590428058944",
+                "T_1590428058624",
+                "T_1590410263232"
+              ],
+              "rejection_reason": null,
+              "timestamp": "2026-05-09T12:27:33.212894"
+            },
+            {
+              "design_id": "T_1590428060224",
+              "passed": true,
+              "score": 0.765947,
+              "total_traits": 10,
+              "passed_traits": 7,
+              "failed_traits": 3,
+              "top_winners": [
+                "T_1590401980736",
+                "T_1590401837504",
+                "T_1590410078272",
+                "T_1590427643136",
+                "T_1590375614208",
+                "T_1590402905216",
+                "T_1590428058368",
+                "T_1590428058944",
+                "T_1590428058624",
+                "T_1590410263232"
+              ],
+              "rejection_reason": null,
+              "timestamp": "2026-05-09T12:27:33.212894"
+            },
+            {
+              "design_id": "T_1590428060736",
+              "passed": true,
+              "score": 0.765947,
+              "total_traits": 10,
+              "passed_traits": 7,
+              "failed_traits": 3,
+              "top_winners": [
+                "T_1590401980736",
+                "T_1590401837504",
+                "T_1590410078272",
+                "T_1590427643136",
+                "T_1590375614208",
+                "T_1590402905216",
+                "T_1590428058368",
+                "T_1590428058944",
+                "T_1590428058624",
+                "T_1590410263232"
+              ],
+              "rejection_reason": null,
+              "timestamp": "2026-05-09T12:27:33.212894"
+            },
+            {
+              "design_id": "T_1590428060672",
+              "passed": true,
+              "score": 0.765947,
+              "total_traits": 10,
+              "passed_traits": 7,
+              "failed_traits": 3,
+              "top_winners": [
+                "T_1590401980736",
+                "T_1590401837504",
+                "T_1590410078272",
+                "T_1590427643136",
+                "T_1590375614208",
+                "T_1590402905216",
+                "T_1590428058368",
+                "T_1590428058944",
+                "T_1590428058624",
+                "T_1590410263232"
+              ],
+              "rejection_reason": null,
+              "timestamp": "2026-05-09T12:27:33.212894"
+            },
+            {
+              "design_id": "T_1590428061440",
+              "passed": true,
+              "score": 0.765947,
+              "total_traits": 10,
+              "passed_traits": 7,
+              "failed_traits": 3,
+              "top_winners": [
+                "T_1590401980736",
+                "T_1590401837504",
+                "T_1590410078272",
+                "T_1590427643136",
+                "T_1590375614208",
+                "T_1590402905216",
+                "T_1590428058368",
+                "T_1590428058944",
+                "T_1590428058624",
+                "T_1590410263232"
+              ],
+              "rejection_reason": null,
+              "timestamp": "2026-05-09T12:27:33.212894"
+            },
+            {
+              "design_id": "T_1590428061120",
+              "passed": true,
+              "score": 0.765947,
+              "total_traits": 10,
+              "passed_traits": 7,
+              "failed_traits": 3,
+              "top_winners": [
+                "T_1590401980736",
+                "T_1590401837504",
+                "T_1590410078272",
+                "T_1590427643136",
+                "T_1590375614208",
+                "T_1590402905216",
+                "T_1590428058368",
+                "T_1590428058944",
+                "T_1590428058624",
+                "T_1590410263232"
+              ],
+              "rejection_reason": null,
+              "timestamp": "2026-05-09T12:27:33.212894"
+            },
+            {
+              "design_id": "T_1590428061888",
+              "passed": true,
+              "score": 0.765947,
+              "total_traits": 10,
+              "passed_traits": 7,
+              "failed_traits": 3,
+              "top_winners": [
+                "T_1590401980736",
+                "T_1590401837504",
+                "T_1590410078272",
+                "T_1590427643136",
+                "T_1590375614208",
+                "T_1590402905216",
+                "T_1590428058368",
+                "T_1590428058944",
+                "T_1590428058624",
+                "T_1590410263232"
+              ],
+              "rejection_reason": null,
+              "timestamp": "2026-05-09T12:27:33.212894"
+            },
+            {
+              "design_id": "T_1590428061568",
+              "passed": true,
+              "score": 0.765947,
+              "total_traits": 10,
+              "passed_traits": 7,
+              "failed_traits": 3,
+              "top_winners": [
+                "T_1590401980736",
+                "T_1590401837504",
+                "T_1590410078272",
+                "T_1590427643136",
+                "T_1590375614208",
+                "T_1590402905216",
+                "T_1590428058368",
+                "T_1590428058944",
+                "T_1590428058624",
+                "T_1590410263232"
+              ],
+              "rejection_reason": null,
+              "timestamp": "2026-05-09T12:27:33.212894"
+            },
+            {
+              "design_id": "T_1590428062464",
+              "passed": true,
+              "score": 0.765947,
+              "total_traits": 10,
+              "passed_traits": 7,
+              "failed_traits": 3,
+              "top_winners": [
+                "T_1590401980736",
+                "T_1590401837504",
+                "T_1590410078272",
+                "T_1590427643136",
+                "T_1590375614208",
+                "T_1590402905216",
+                "T_1590428058368",
+                "T_1590428058944",
+                "T_1590428058624",
+                "T_1590410263232"
+              ],
+              "rejection_reason": null,
+              "timestamp": "2026-05-09T12:27:33.212894"
+            },
+            {
+              "design_id": "T_1590428062592",
+              "passed": true,
+              "score": 0.765947,
+              "total_traits": 10,
+              "passed_traits": 7,
+              "failed_traits": 3,
+              "top_winners": [
+                "T_1590401980736",
+                "T_1590401837504",
+                "T_1590410078272",
+                "T_1590427643136",
+                "T_1590375614208",
+                "T_1590402905216",
+                "T_1590428058368",
+                "T_1590428058944",
+                "T_1590428058624",
+                "T_1590410263232"
+              ],
+              "rejection_reason": null,
+              "timestamp": "2026-05-09T12:27:33.212894"
+            },
+            {
+              "design_id": "T_1590428062720",
+              "passed": true,
+              "score": 0.765947,
+              "total_traits": 10,
+              "passed_traits": 7,
+              "failed_traits": 3,
+              "top_winners": [
+                "T_1590401980736",
+                "T_1590401837504",
+                "T_1590410078272",
+                "T_1590427643136",
+                "T_1590375614208",
+                "T_1590402905216",
+                "T_1590428058368",
+                "T_1590428058944",
+                "T_1590428058624",
+                "T_1590410263232"
+              ],
+              "rejection_reason": null,
+              "timestamp": "2026-05-09T12:27:33.212894"
+            },
+            {
+              "design_id": "T_1590428062848",
+              "passed": true,
+              "score": 0.765947,
+              "total_traits": 10,
+              "passed_traits": 7,
+              "failed_traits": 3,
+              "top_winners": [
+                "T_1590401980736",
+                "T_1590401837504",
+                "T_1590410078272",
+                "T_1590427643136",
+                "T_1590375614208",
+                "T_1590402905216",
+                "T_1590428058368",
+                "T_1590428058944",
+                "T_1590428058624",
+                "T_1590410263232"
+              ],
+              "rejection_reason": null,
+              "timestamp": "2026-05-09T12:27:33.212894"
+            },
+            {
+              "design_id": "T_1590428062976",
+              "passed": true,
+              "score": 0.765947,
+              "total_traits": 10,
+              "passed_traits": 7,
+              "failed_traits": 3,
+              "top_winners": [
+                "T_1590401980736",
+                "T_1590401837504",
+                "T_1590410078272",
+                "T_1590427643136",
+                "T_1590375614208",
+                "T_1590402905216",
+                "T_1590428058368",
+                "T_1590428058944",
+                "T_1590428058624",
+                "T_1590410263232"
+              ],
+              "rejection_reason": null,
+              "timestamp": "2026-05-09T12:27:33.212894"
+            },
+            {
+              "design_id": "T_1590428063104",
+              "passed": true,
+              "score": 0.765947,
+              "total_traits": 10,
+              "passed_traits": 7,
+              "failed_traits": 3,
+              "top_winners": [
+                "T_1590401980736",
+                "T_1590401837504",
+                "T_1590410078272",
+                "T_1590427643136",
+                "T_1590375614208",
+                "T_1590402905216",
+                "T_1590428058368",
+                "T_1590428058944",
+                "T_1590428058624",
+                "T_1590410263232"
+              ],
+              "rejection_reason": null,
+              "timestamp": "2026-05-09T12:27:33.212894"
+            },
+            {
+              "design_id": "T_1590428063232",
+              "passed": true,
+              "score": 0.765947,
+              "total_traits": 10,
+              "passed_traits": 7,
+              "failed_traits": 3,
+              "top_winners": [
+                "T_1590401980736",
+                "T_1590401837504",
+                "T_1590410078272",
+                "T_1590427643136",
+                "T_1590375614208",
+                "T_1590402905216",
+                "T_1590428058368",
+                "T_1590428058944",
+                "T_1590428058624",
+                "T_1590410263232"
+              ],
+              "rejection_reason": null,
+              "timestamp": "2026-05-09T12:27:33.212894"
+            },
+            {
+              "design_id": "T_1590428063360",
+              "passed": true,
+              "score": 0.765947,
+              "total_traits": 10,
+              "passed_traits": 7,
+              "failed_traits": 3,
+              "top_winners": [
+                "T_1590401980736",
+                "T_1590401837504",
+                "T_1590410078272",
+                "T_1590427643136",
+                "T_1590375614208",
+                "T_1590402905216",
+                "T_1590428058368",
+                "T_1590428058944",
+                "T_1590428058624",
+                "T_1590410263232"
+              ],
+              "rejection_reason": null,
+              "timestamp": "2026-05-09T12:27:33.212894"
+            },
+            {
+              "design_id": "T_1590428063488",
+              "passed": true,
+              "score": 0.765947,
+              "total_traits": 10,
+              "passed_traits": 7,
+              "failed_traits": 3,
+              "top_winners": [
+                "T_1590401980736",
+                "T_1590401837504",
+                "T_1590410078272",
+                "T_1590427643136",
+                "T_1590375614208",
+                "T_1590402905216",
+                "T_1590428058368",
+                "T_1590428058944",
+                "T_1590428058624",
+                "T_1590410263232"
+              ],
+              "rejection_reason": null,
+              "timestamp": "2026-05-09T12:27:33.212894"
+            }
+          ]
+        }
+      },
+      {
+        "name": "Cross-Domain Validation",
+        "passed": 0,
+        "duration_ms": 0.56,
+        "result": {
+          "passed": 0,
+          "total": 30,
+          "failed": 30,
+          "failure_distribution": {
+            "quantum": 0,
+            "nuclear": 0,
+            "chemical": 0,
+            "materials": 30,
+            "molecular_bio": 0,
+            "cellular": 0,
+            "organismal": 0,
+            "ecological": 0,
+            "physics": 0,
+            "earth_planetary": 0,
+            "space": 0,
+            "human_social": 0,
+            "economic": 0
+          },
+          "results": [
+            {
+              "design_id": "T_1590401980736",
+              "overall_passed": false,
+              "failure_domain": "materials",
+              "failure_reason": "Materials score 0.6782 < min 0.68",
+              "domains_checked": 4,
+              "checks": [
+                {
+                  "domain": "quantum",
+                  "score": 0.9,
+                  "threshold": 0.72,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "nuclear",
+                  "score": 0.9,
+                  "threshold": 0.7,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "chemical",
+                  "score": 0.9,
+                  "threshold": 0.72,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "materials",
+                  "score": 0.6782,
+                  "threshold": 0.68,
+                  "passed": false,
+                  "reason": "Materials score 0.6782 < min 0.68"
+                }
+              ]
+            },
+            {
+              "design_id": "T_1590401837504",
+              "overall_passed": false,
+              "failure_domain": "materials",
+              "failure_reason": "Materials score 0.6782 < min 0.68",
+              "domains_checked": 4,
+              "checks": [
+                {
+                  "domain": "quantum",
+                  "score": 0.9,
+                  "threshold": 0.72,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "nuclear",
+                  "score": 0.9,
+                  "threshold": 0.7,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "chemical",
+                  "score": 0.9,
+                  "threshold": 0.72,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "materials",
+                  "score": 0.6782,
+                  "threshold": 0.68,
+                  "passed": false,
+                  "reason": "Materials score 0.6782 < min 0.68"
+                }
+              ]
+            },
+            {
+              "design_id": "T_1590410078272",
+              "overall_passed": false,
+              "failure_domain": "materials",
+              "failure_reason": "Materials score 0.6782 < min 0.68",
+              "domains_checked": 4,
+              "checks": [
+                {
+                  "domain": "quantum",
+                  "score": 0.9,
+                  "threshold": 0.72,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "nuclear",
+                  "score": 0.9,
+                  "threshold": 0.7,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "chemical",
+                  "score": 0.9,
+                  "threshold": 0.72,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "materials",
+                  "score": 0.6782,
+                  "threshold": 0.68,
+                  "passed": false,
+                  "reason": "Materials score 0.6782 < min 0.68"
+                }
+              ]
+            },
+            {
+              "design_id": "T_1590427643136",
+              "overall_passed": false,
+              "failure_domain": "materials",
+              "failure_reason": "Materials score 0.6782 < min 0.68",
+              "domains_checked": 4,
+              "checks": [
+                {
+                  "domain": "quantum",
+                  "score": 0.9,
+                  "threshold": 0.72,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "nuclear",
+                  "score": 0.9,
+                  "threshold": 0.7,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "chemical",
+                  "score": 0.9,
+                  "threshold": 0.72,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "materials",
+                  "score": 0.6782,
+                  "threshold": 0.68,
+                  "passed": false,
+                  "reason": "Materials score 0.6782 < min 0.68"
+                }
+              ]
+            },
+            {
+              "design_id": "T_1590375614208",
+              "overall_passed": false,
+              "failure_domain": "materials",
+              "failure_reason": "Materials score 0.6782 < min 0.68",
+              "domains_checked": 4,
+              "checks": [
+                {
+                  "domain": "quantum",
+                  "score": 0.9,
+                  "threshold": 0.72,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "nuclear",
+                  "score": 0.9,
+                  "threshold": 0.7,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "chemical",
+                  "score": 0.9,
+                  "threshold": 0.72,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "materials",
+                  "score": 0.6782,
+                  "threshold": 0.68,
+                  "passed": false,
+                  "reason": "Materials score 0.6782 < min 0.68"
+                }
+              ]
+            },
+            {
+              "design_id": "T_1590402905216",
+              "overall_passed": false,
+              "failure_domain": "materials",
+              "failure_reason": "Materials score 0.6782 < min 0.68",
+              "domains_checked": 4,
+              "checks": [
+                {
+                  "domain": "quantum",
+                  "score": 0.9,
+                  "threshold": 0.72,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "nuclear",
+                  "score": 0.9,
+                  "threshold": 0.7,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "chemical",
+                  "score": 0.9,
+                  "threshold": 0.72,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "materials",
+                  "score": 0.6782,
+                  "threshold": 0.68,
+                  "passed": false,
+                  "reason": "Materials score 0.6782 < min 0.68"
+                }
+              ]
+            },
+            {
+              "design_id": "T_1590428058368",
+              "overall_passed": false,
+              "failure_domain": "materials",
+              "failure_reason": "Materials score 0.6782 < min 0.68",
+              "domains_checked": 4,
+              "checks": [
+                {
+                  "domain": "quantum",
+                  "score": 0.9,
+                  "threshold": 0.72,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "nuclear",
+                  "score": 0.9,
+                  "threshold": 0.7,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "chemical",
+                  "score": 0.9,
+                  "threshold": 0.72,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "materials",
+                  "score": 0.6782,
+                  "threshold": 0.68,
+                  "passed": false,
+                  "reason": "Materials score 0.6782 < min 0.68"
+                }
+              ]
+            },
+            {
+              "design_id": "T_1590428058944",
+              "overall_passed": false,
+              "failure_domain": "materials",
+              "failure_reason": "Materials score 0.6782 < min 0.68",
+              "domains_checked": 4,
+              "checks": [
+                {
+                  "domain": "quantum",
+                  "score": 0.9,
+                  "threshold": 0.72,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "nuclear",
+                  "score": 0.9,
+                  "threshold": 0.7,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "chemical",
+                  "score": 0.9,
+                  "threshold": 0.72,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "materials",
+                  "score": 0.6782,
+                  "threshold": 0.68,
+                  "passed": false,
+                  "reason": "Materials score 0.6782 < min 0.68"
+                }
+              ]
+            },
+            {
+              "design_id": "T_1590428058624",
+              "overall_passed": false,
+              "failure_domain": "materials",
+              "failure_reason": "Materials score 0.6782 < min 0.68",
+              "domains_checked": 4,
+              "checks": [
+                {
+                  "domain": "quantum",
+                  "score": 0.9,
+                  "threshold": 0.72,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "nuclear",
+                  "score": 0.9,
+                  "threshold": 0.7,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "chemical",
+                  "score": 0.9,
+                  "threshold": 0.72,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "materials",
+                  "score": 0.6782,
+                  "threshold": 0.68,
+                  "passed": false,
+                  "reason": "Materials score 0.6782 < min 0.68"
+                }
+              ]
+            },
+            {
+              "design_id": "T_1590410263232",
+              "overall_passed": false,
+              "failure_domain": "materials",
+              "failure_reason": "Materials score 0.6782 < min 0.68",
+              "domains_checked": 4,
+              "checks": [
+                {
+                  "domain": "quantum",
+                  "score": 0.9,
+                  "threshold": 0.72,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "nuclear",
+                  "score": 0.9,
+                  "threshold": 0.7,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "chemical",
+                  "score": 0.9,
+                  "threshold": 0.72,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "materials",
+                  "score": 0.6782,
+                  "threshold": 0.68,
+                  "passed": false,
+                  "reason": "Materials score 0.6782 < min 0.68"
+                }
+              ]
+            },
+            {
+              "design_id": "T_1590428059200",
+              "overall_passed": false,
+              "failure_domain": "materials",
+              "failure_reason": "Materials score 0.6782 < min 0.68",
+              "domains_checked": 4,
+              "checks": [
+                {
+                  "domain": "quantum",
+                  "score": 0.9,
+                  "threshold": 0.72,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "nuclear",
+                  "score": 0.9,
+                  "threshold": 0.7,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "chemical",
+                  "score": 0.9,
+                  "threshold": 0.72,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "materials",
+                  "score": 0.6782,
+                  "threshold": 0.68,
+                  "passed": false,
+                  "reason": "Materials score 0.6782 < min 0.68"
+                }
+              ]
+            },
+            {
+              "design_id": "T_1590428059776",
+              "overall_passed": false,
+              "failure_domain": "materials",
+              "failure_reason": "Materials score 0.6782 < min 0.68",
+              "domains_checked": 4,
+              "checks": [
+                {
+                  "domain": "quantum",
+                  "score": 0.9,
+                  "threshold": 0.72,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "nuclear",
+                  "score": 0.9,
+                  "threshold": 0.7,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "chemical",
+                  "score": 0.9,
+                  "threshold": 0.72,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "materials",
+                  "score": 0.6782,
+                  "threshold": 0.68,
+                  "passed": false,
+                  "reason": "Materials score 0.6782 < min 0.68"
+                }
+              ]
+            },
+            {
+              "design_id": "T_1590428059712",
+              "overall_passed": false,
+              "failure_domain": "materials",
+              "failure_reason": "Materials score 0.6782 < min 0.68",
+              "domains_checked": 4,
+              "checks": [
+                {
+                  "domain": "quantum",
+                  "score": 0.9,
+                  "threshold": 0.72,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "nuclear",
+                  "score": 0.9,
+                  "threshold": 0.7,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "chemical",
+                  "score": 0.9,
+                  "threshold": 0.72,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "materials",
+                  "score": 0.6782,
+                  "threshold": 0.68,
+                  "passed": false,
+                  "reason": "Materials score 0.6782 < min 0.68"
+                }
+              ]
+            },
+            {
+              "design_id": "T_1590428060288",
+              "overall_passed": false,
+              "failure_domain": "materials",
+              "failure_reason": "Materials score 0.6782 < min 0.68",
+              "domains_checked": 4,
+              "checks": [
+                {
+                  "domain": "quantum",
+                  "score": 0.9,
+                  "threshold": 0.72,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "nuclear",
+                  "score": 0.9,
+                  "threshold": 0.7,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "chemical",
+                  "score": 0.9,
+                  "threshold": 0.72,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "materials",
+                  "score": 0.6782,
+                  "threshold": 0.68,
+                  "passed": false,
+                  "reason": "Materials score 0.6782 < min 0.68"
+                }
+              ]
+            },
+            {
+              "design_id": "T_1590428060224",
+              "overall_passed": false,
+              "failure_domain": "materials",
+              "failure_reason": "Materials score 0.6782 < min 0.68",
+              "domains_checked": 4,
+              "checks": [
+                {
+                  "domain": "quantum",
+                  "score": 0.9,
+                  "threshold": 0.72,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "nuclear",
+                  "score": 0.9,
+                  "threshold": 0.7,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "chemical",
+                  "score": 0.9,
+                  "threshold": 0.72,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "materials",
+                  "score": 0.6782,
+                  "threshold": 0.68,
+                  "passed": false,
+                  "reason": "Materials score 0.6782 < min 0.68"
+                }
+              ]
+            },
+            {
+              "design_id": "T_1590428060736",
+              "overall_passed": false,
+              "failure_domain": "materials",
+              "failure_reason": "Materials score 0.6782 < min 0.68",
+              "domains_checked": 4,
+              "checks": [
+                {
+                  "domain": "quantum",
+                  "score": 0.9,
+                  "threshold": 0.72,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "nuclear",
+                  "score": 0.9,
+                  "threshold": 0.7,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "chemical",
+                  "score": 0.9,
+                  "threshold": 0.72,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "materials",
+                  "score": 0.6782,
+                  "threshold": 0.68,
+                  "passed": false,
+                  "reason": "Materials score 0.6782 < min 0.68"
+                }
+              ]
+            },
+            {
+              "design_id": "T_1590428060672",
+              "overall_passed": false,
+              "failure_domain": "materials",
+              "failure_reason": "Materials score 0.6782 < min 0.68",
+              "domains_checked": 4,
+              "checks": [
+                {
+                  "domain": "quantum",
+                  "score": 0.9,
+                  "threshold": 0.72,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "nuclear",
+                  "score": 0.9,
+                  "threshold": 0.7,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "chemical",
+                  "score": 0.9,
+                  "threshold": 0.72,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "materials",
+                  "score": 0.6782,
+                  "threshold": 0.68,
+                  "passed": false,
+                  "reason": "Materials score 0.6782 < min 0.68"
+                }
+              ]
+            },
+            {
+              "design_id": "T_1590428061440",
+              "overall_passed": false,
+              "failure_domain": "materials",
+              "failure_reason": "Materials score 0.6782 < min 0.68",
+              "domains_checked": 4,
+              "checks": [
+                {
+                  "domain": "quantum",
+                  "score": 0.9,
+                  "threshold": 0.72,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "nuclear",
+                  "score": 0.9,
+                  "threshold": 0.7,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "chemical",
+                  "score": 0.9,
+                  "threshold": 0.72,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "materials",
+                  "score": 0.6782,
+                  "threshold": 0.68,
+                  "passed": false,
+                  "reason": "Materials score 0.6782 < min 0.68"
+                }
+              ]
+            },
+            {
+              "design_id": "T_1590428061120",
+              "overall_passed": false,
+              "failure_domain": "materials",
+              "failure_reason": "Materials score 0.6782 < min 0.68",
+              "domains_checked": 4,
+              "checks": [
+                {
+                  "domain": "quantum",
+                  "score": 0.9,
+                  "threshold": 0.72,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "nuclear",
+                  "score": 0.9,
+                  "threshold": 0.7,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "chemical",
+                  "score": 0.9,
+                  "threshold": 0.72,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "materials",
+                  "score": 0.6782,
+                  "threshold": 0.68,
+                  "passed": false,
+                  "reason": "Materials score 0.6782 < min 0.68"
+                }
+              ]
+            },
+            {
+              "design_id": "T_1590428061888",
+              "overall_passed": false,
+              "failure_domain": "materials",
+              "failure_reason": "Materials score 0.6782 < min 0.68",
+              "domains_checked": 4,
+              "checks": [
+                {
+                  "domain": "quantum",
+                  "score": 0.9,
+                  "threshold": 0.72,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "nuclear",
+                  "score": 0.9,
+                  "threshold": 0.7,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "chemical",
+                  "score": 0.9,
+                  "threshold": 0.72,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "materials",
+                  "score": 0.6782,
+                  "threshold": 0.68,
+                  "passed": false,
+                  "reason": "Materials score 0.6782 < min 0.68"
+                }
+              ]
+            },
+            {
+              "design_id": "T_1590428061568",
+              "overall_passed": false,
+              "failure_domain": "materials",
+              "failure_reason": "Materials score 0.6782 < min 0.68",
+              "domains_checked": 4,
+              "checks": [
+                {
+                  "domain": "quantum",
+                  "score": 0.9,
+                  "threshold": 0.72,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "nuclear",
+                  "score": 0.9,
+                  "threshold": 0.7,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "chemical",
+                  "score": 0.9,
+                  "threshold": 0.72,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "materials",
+                  "score": 0.6782,
+                  "threshold": 0.68,
+                  "passed": false,
+                  "reason": "Materials score 0.6782 < min 0.68"
+                }
+              ]
+            },
+            {
+              "design_id": "T_1590428062464",
+              "overall_passed": false,
+              "failure_domain": "materials",
+              "failure_reason": "Materials score 0.6782 < min 0.68",
+              "domains_checked": 4,
+              "checks": [
+                {
+                  "domain": "quantum",
+                  "score": 0.9,
+                  "threshold": 0.72,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "nuclear",
+                  "score": 0.9,
+                  "threshold": 0.7,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "chemical",
+                  "score": 0.9,
+                  "threshold": 0.72,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "materials",
+                  "score": 0.6782,
+                  "threshold": 0.68,
+                  "passed": false,
+                  "reason": "Materials score 0.6782 < min 0.68"
+                }
+              ]
+            },
+            {
+              "design_id": "T_1590428062592",
+              "overall_passed": false,
+              "failure_domain": "materials",
+              "failure_reason": "Materials score 0.6782 < min 0.68",
+              "domains_checked": 4,
+              "checks": [
+                {
+                  "domain": "quantum",
+                  "score": 0.9,
+                  "threshold": 0.72,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "nuclear",
+                  "score": 0.9,
+                  "threshold": 0.7,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "chemical",
+                  "score": 0.9,
+                  "threshold": 0.72,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "materials",
+                  "score": 0.6782,
+                  "threshold": 0.68,
+                  "passed": false,
+                  "reason": "Materials score 0.6782 < min 0.68"
+                }
+              ]
+            },
+            {
+              "design_id": "T_1590428062720",
+              "overall_passed": false,
+              "failure_domain": "materials",
+              "failure_reason": "Materials score 0.6782 < min 0.68",
+              "domains_checked": 4,
+              "checks": [
+                {
+                  "domain": "quantum",
+                  "score": 0.9,
+                  "threshold": 0.72,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "nuclear",
+                  "score": 0.9,
+                  "threshold": 0.7,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "chemical",
+                  "score": 0.9,
+                  "threshold": 0.72,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "materials",
+                  "score": 0.6782,
+                  "threshold": 0.68,
+                  "passed": false,
+                  "reason": "Materials score 0.6782 < min 0.68"
+                }
+              ]
+            },
+            {
+              "design_id": "T_1590428062848",
+              "overall_passed": false,
+              "failure_domain": "materials",
+              "failure_reason": "Materials score 0.6782 < min 0.68",
+              "domains_checked": 4,
+              "checks": [
+                {
+                  "domain": "quantum",
+                  "score": 0.9,
+                  "threshold": 0.72,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "nuclear",
+                  "score": 0.9,
+                  "threshold": 0.7,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "chemical",
+                  "score": 0.9,
+                  "threshold": 0.72,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "materials",
+                  "score": 0.6782,
+                  "threshold": 0.68,
+                  "passed": false,
+                  "reason": "Materials score 0.6782 < min 0.68"
+                }
+              ]
+            },
+            {
+              "design_id": "T_1590428062976",
+              "overall_passed": false,
+              "failure_domain": "materials",
+              "failure_reason": "Materials score 0.6782 < min 0.68",
+              "domains_checked": 4,
+              "checks": [
+                {
+                  "domain": "quantum",
+                  "score": 0.9,
+                  "threshold": 0.72,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "nuclear",
+                  "score": 0.9,
+                  "threshold": 0.7,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "chemical",
+                  "score": 0.9,
+                  "threshold": 0.72,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "materials",
+                  "score": 0.6782,
+                  "threshold": 0.68,
+                  "passed": false,
+                  "reason": "Materials score 0.6782 < min 0.68"
+                }
+              ]
+            },
+            {
+              "design_id": "T_1590428063104",
+              "overall_passed": false,
+              "failure_domain": "materials",
+              "failure_reason": "Materials score 0.6782 < min 0.68",
+              "domains_checked": 4,
+              "checks": [
+                {
+                  "domain": "quantum",
+                  "score": 0.9,
+                  "threshold": 0.72,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "nuclear",
+                  "score": 0.9,
+                  "threshold": 0.7,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "chemical",
+                  "score": 0.9,
+                  "threshold": 0.72,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "materials",
+                  "score": 0.6782,
+                  "threshold": 0.68,
+                  "passed": false,
+                  "reason": "Materials score 0.6782 < min 0.68"
+                }
+              ]
+            },
+            {
+              "design_id": "T_1590428063232",
+              "overall_passed": false,
+              "failure_domain": "materials",
+              "failure_reason": "Materials score 0.6782 < min 0.68",
+              "domains_checked": 4,
+              "checks": [
+                {
+                  "domain": "quantum",
+                  "score": 0.9,
+                  "threshold": 0.72,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "nuclear",
+                  "score": 0.9,
+                  "threshold": 0.7,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "chemical",
+                  "score": 0.9,
+                  "threshold": 0.72,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "materials",
+                  "score": 0.6782,
+                  "threshold": 0.68,
+                  "passed": false,
+                  "reason": "Materials score 0.6782 < min 0.68"
+                }
+              ]
+            },
+            {
+              "design_id": "T_1590428063360",
+              "overall_passed": false,
+              "failure_domain": "materials",
+              "failure_reason": "Materials score 0.6782 < min 0.68",
+              "domains_checked": 4,
+              "checks": [
+                {
+                  "domain": "quantum",
+                  "score": 0.9,
+                  "threshold": 0.72,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "nuclear",
+                  "score": 0.9,
+                  "threshold": 0.7,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "chemical",
+                  "score": 0.9,
+                  "threshold": 0.72,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "materials",
+                  "score": 0.6782,
+                  "threshold": 0.68,
+                  "passed": false,
+                  "reason": "Materials score 0.6782 < min 0.68"
+                }
+              ]
+            },
+            {
+              "design_id": "T_1590428063488",
+              "overall_passed": false,
+              "failure_domain": "materials",
+              "failure_reason": "Materials score 0.6782 < min 0.68",
+              "domains_checked": 4,
+              "checks": [
+                {
+                  "domain": "quantum",
+                  "score": 0.9,
+                  "threshold": 0.72,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "nuclear",
+                  "score": 0.9,
+                  "threshold": 0.7,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "chemical",
+                  "score": 0.9,
+                  "threshold": 0.72,
+                  "passed": true,
+                  "reason": null
+                },
+                {
+                  "domain": "materials",
+                  "score": 0.6782,
+                  "threshold": 0.68,
+                  "passed": false,
+                  "reason": "Materials score 0.6782 < min 0.68"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "name": "Accuracy Validation",
+        "passed": false,
+        "duration_ms": 5.45,
+        "result": {
+          "passed": false,
+          "accuracy_pct": 86.0,
+          "false_positive_pct": 43.75,
+          "false_negative_pct": 0.0,
+          "precision": 0.8293,
+          "recall": 1.0,
+          "f1_score": 0.9067,
+          "recommended_threshold": 0.5,
+          "violations": [
+            "FP rate 43.75% > 5%"
+          ]
+        }
+      },
+      {
+        "name": "Speed Test",
+        "passed": true,
+        "duration_ms": 1.5,
+        "result": {
+          "passed": true,
+          "elapsed_ms": 1.48,
+          "threshold_ms": 500
+        }
+      },
+      {
+        "name": "Failure Analysis",
+        "passed": true,
+        "duration_ms": 1.21,
+        "result": {
+          "passed": true,
+          "total_failures": 0,
+          "distribution": {
+            "physics_issue": 0,
+            "boundary_issue": 0,
+            "data_issue": 0,
+            "domain_mismatch": 0,
+            "threshold_breach": 0
+          },
+          "severity_breakdown": {
+            "critical": 0,
+            "high": 0,
+            "medium": 0,
+            "low": 0
+          },
+          "top_suggestions": [],
+          "analyses": []
+        }
+      },
+      {
+        "name": "FP Fixer",
+        "passed": true,
+        "duration_ms": 5.43,
+        "result": {
+          "passed": true,
+          "optimal_threshold": 0.62,
+          "fp_rate": 0.0
+        }
+      },
+      {
+        "name": "Feedback Loop",
+        "passed": true,
+        "duration_ms": 31.57,
+        "result": {
+          "passed": true,
+          "generation_logged": "gen_20260509_122733",
+          "recurring_patterns": 3,
+          "suggestions": [
+            "Recurring physics issues: Consider adjusting physics model parameters or training data",
+            "Recurring boundary issues: Review geometric constraints and boundary conditions",
+            "Recurring threshold breaches: Consider lowering acceptance threshold or improving model accuracy"
+          ]
+        }
+      }
+    ]
+  }
+}
