@@ -71,7 +71,23 @@ class CrossDomainValidator:
         self.thresholds = thresholds or DOMAIN_THRESHOLDS
 
     def _check(self, sim: SimulationResult, domain: str) -> DomainCheck:
-        score  = getattr(sim, f"{domain}_score", 0.9)  # Default to 0.9 if missing
+        REAL_SCORE_MAP = {
+            "molecular_bio":   "biology_score",
+            "cellular":        "biology_score",
+            "organismal":      "biology_score",
+            "ecological":      "biology_score",
+            "chemical":        "chemistry_score",
+            "materials":       "materials_score",
+            "physics":         "physics_score",
+            "quantum":         "physics_score",
+            "nuclear":         "physics_score",
+            "earth_planetary": "physics_score",
+            "space":           "physics_score",
+            "human_social":    "biology_score",
+            "economic":        "materials_score",
+        }
+        field_name = REAL_SCORE_MAP.get(domain, f"{domain}_score")
+        score = getattr(sim, field_name, sim.score)   # fall back to overall score, not 0.9
         thresh = self.thresholds[domain]
         passed = score >= thresh
         return DomainCheck(
