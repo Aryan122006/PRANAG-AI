@@ -57,7 +57,7 @@ class AccuracyValidator:
     ACCURACY_THRESHOLD  = 0.85  # Relaxed from 0.95 for realistic surrogate
     FALSE_POSITIVE_MAX  = 0.05
     FALSE_NEGATIVE_MAX  = 0.10
-    PASS_THRESHOLD      = 0.60  # Adjusted to reflect improved scoring
+    PASS_THRESHOLD      = 0.70  # Adjusted to reflect improved scoring
 
     def compute_metrics(self, predictions: list) -> AccuracyMetrics:
         tp = tn = fp = fn = 0
@@ -76,7 +76,7 @@ class AccuracyValidator:
         f1       = 2 * precision * recall / (precision + recall) if (precision + recall) else 0
 
         violations = []
-        if accuracy  < self.ACCURACY_THRESHOLD: violations.append(f"Accuracy {accuracy*100:.2f}% < 95%")
+        if accuracy  < self.ACCURACY_THRESHOLD: violations.append(f"Accuracy {accuracy*100:.2f}% < {self.ACCURACY_THRESHOLD*100:.0f}%")
         if fp_rate   > self.FALSE_POSITIVE_MAX: violations.append(f"FP rate {fp_rate*100:.2f}% > 5%")
         if fn_rate   > self.FALSE_NEGATIVE_MAX: violations.append(f"FN rate {fn_rate*100:.2f}% > 10%")
 
@@ -178,8 +178,8 @@ def generate_mock_predictions(n=100, noise=0.08) -> list:
             design_id=f"D{i+1:03d}",
             surrogate_score=surr,
             full_physics_score=full,
-            surrogate_pass=surr >= 0.60,  # Use calibrated threshold
-            full_physics_pass=full >= 0.60,
+            surrogate_pass=surr >= 0.70,
+            full_physics_pass=full >= 0.70,
         ))
     return preds
 
