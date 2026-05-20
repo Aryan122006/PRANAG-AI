@@ -38,7 +38,7 @@ class ValidationResult:
 
 
 class Validator:
-    PASS_THRESHOLD = 0.60  # Adjusted to reflect improved scoring
+    PASS_THRESHOLD = 0.70  # viability >= 0.70 → PASS
 
     def __init__(self):
         self.results = []
