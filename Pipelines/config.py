@@ -64,7 +64,7 @@ CHECKPOINT_EVERY  = 10         # save checkpoint every N batches
 # ── VALIDATION THRESHOLDS (for Divyanshu) ────────────────────────────────────
 
 VALIDATION = {
-    "pass_threshold":   0.60,  # Adjusted to reflect improved scoring
+    "pass_threshold":   0.70,  # Spec: viability < 0.7 → KILL
     "biology_min":      0.65,
     "materials_min":    0.68,
     "physics_min":      0.70,

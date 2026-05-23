@@ -71,7 +71,11 @@ class CrossDomainValidator:
         self.thresholds = thresholds or DOMAIN_THRESHOLDS
 
     def _check(self, sim: SimulationResult, domain: str) -> DomainCheck:
-        score  = getattr(sim, f"{domain}_score", 0.9)  # Default to 0.9 if missing
+        score  = getattr(sim, f"{domain}_score", None)
+        if score is None:
+            return DomainCheck(domain=domain, score=0.0, threshold=thresh, passed=False,
+                               reason=f"{domain.capitalize()} score not evaluated (domain not computed)")
+        score = float(score)
         thresh = self.thresholds[domain]
         passed = score >= thresh
         return DomainCheck(

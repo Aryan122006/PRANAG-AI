@@ -85,7 +85,7 @@ class FailureAnalysis:
 
 
 class FailureAnalyzer:
-    PASS_THRESHOLD      = 0.60  # Adjusted to reflect improved scoring
+    PASS_THRESHOLD      = 0.70  # Spec: viability < 0.7 → KILL
     BOUNDARY_THRESHOLD  = 0.50
     NOISE_THRESHOLD     = 0.15
 

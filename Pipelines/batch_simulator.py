@@ -200,7 +200,7 @@ class SrikarModelInterface:
         return [time_v, temp, water]
 
     def _features_biology(self, row: dict):
-        temp = self._normalise(self._safe_float(row, "temperature_max", 40), 0, 1500)
+        temp = self._normalise(self._safe_float(row, "temperature_max", 40), 0, 100)
         water = self._normalise(self._safe_float(row, "water", 0.5), 0, 1)
         nitrogen = self._normalise(self._safe_float(row, "nitrogen", 0.4), 0, 1)
         light = self._normalise(self._safe_float(row, "light_intensity", 0.6), 0, 1)
@@ -220,7 +220,7 @@ class SrikarModelInterface:
 
     def _features_biology_batch(self, df: pd.DataFrame) -> np.ndarray:
         """(N, 5): [temperature, water, nitrogen, light_intensity, time]"""
-        temp  = self._norm_arr(self._col(df, "temperature_max",   40.0), 0,  1500)
+        temp  = self._norm_arr(self._col(df, "temperature_max",   40.0), 0,  100)
         water = self._norm_arr(self._col(df, "water",              0.5),  0,  1)
         nitro = self._norm_arr(self._col(df, "nitrogen",           0.4),  0,  1)
         light = self._norm_arr(self._col(df, "light_intensity",    0.6),  0,  1)
@@ -308,49 +308,46 @@ class SrikarModelInterface:
         if self.surrogates_loaded:
             heat = self._predict_from_surrogate("heat", self._features_heat(row))
             stress = self._predict_from_surrogate("stress", self._features_stress(row))
-            physics = float(np.clip(0.5 * heat + 0.5 * stress, 0.0, 1.0))
-            # Apply calibration boost for low physics scores
-            return float(np.clip(physics * 1.3 + 0.15, 0.0, 1.0))  # Boost low scores
+            return float(np.clip(0.5 * heat + 0.5 * stress, 0.0, 1.0))
         if self.models_loaded:
             with torch.no_grad():
                 heat_out = self.heat_model(self._as_tensor(self._features_heat(row)))
                 stress_out = self.stress_model(self._as_tensor(self._features_stress(row)))
                 heat = float(np.clip(heat_out[0, 0].item(), 0.0, 1.0))
                 stress = float(np.clip(float(stress_out[0].mean().item()), 0.0, 1.0))
-                physics = float(np.clip(0.5 * heat + 0.5 * stress, 0.0, 1.0))
-                return float(np.clip(physics * 1.3 + 0.15, 0.0, 1.0))  # Boost low scores
-        temp = self._safe_float(row, "temperature_max", 50.0)  # Changed default from 0 to 50
-        strength = self._safe_float(row, "strength", 1000.0)  # Changed default from 0 to 1000
+                return float(np.clip(0.5 * heat + 0.5 * stress, 0.0, 1.0))
+        temp = self._safe_float(row, "temperature_max", 50.0)
+        strength = self._safe_float(row, "strength", 1000.0)
         physics = self._normalise(temp, 0, 100) * 0.4 + self._normalise(strength, 0, 2000) * 0.6
-        return float(np.clip(physics * 1.3 + 0.15, 0.0, 1.0))  # Boost low scores
+        return float(np.clip(physics, 0.0, 1.0))
 
     def predict_material(self, row: dict) -> float:
         if self.surrogates_loaded:
             stress = self._predict_from_surrogate("stress", self._features_stress(row))
-            return float(np.clip(stress * 1.15 + 0.1, 0.0, 1.0))  # Boost material scores
+            return float(np.clip(stress, 0.0, 1.0))
         if self.models_loaded:
             with torch.no_grad():
                 stress_out = self.stress_model(self._as_tensor(self._features_stress(row)))
                 material = float(np.clip(float(stress_out[0].mean().item()), 0.0, 1.0))
-                return float(np.clip(material * 1.15 + 0.1, 0.0, 1.0))  # Boost material scores
-        strength = self._safe_float(row, "strength", 1000.0)  # Changed default from 0 to 1000
-        conductivity = self._safe_float(row, "conductivity", 100.0)  # Changed default from 0 to 100
+                return float(np.clip(material, 0.0, 1.0))
+        strength = self._safe_float(row, "strength", 1000.0)
+        conductivity = self._safe_float(row, "conductivity", 100.0)
         material = self._normalise(strength, 0, 2000) * 0.5 + self._normalise(conductivity, 0, 200) * 0.5
-        return float(np.clip(material * 1.15 + 0.1, 0.0, 1.0))  # Boost material scores
+        return float(np.clip(material, 0.0, 1.0))
 
     def predict_chemistry(self, row: dict) -> float:
         if self.surrogates_loaded:
             chemistry = self._predict_from_surrogate("chemistry", self._features_chemistry(row))
-            return float(np.clip(chemistry * 1.2 + 0.1, 0.0, 1.0))  # Boost chemistry scores
+            return float(np.clip(chemistry, 0.0, 1.0))
         if self.models_loaded:
             with torch.no_grad():
                 out = self.chem_model(self._as_tensor(self._features_chemistry(row)))
                 chemistry = float(np.clip(out[0, 0].item(), 0.0, 1.0))
-                return float(np.clip(chemistry * 1.2 + 0.1, 0.0, 1.0))  # Boost chemistry scores
+                return float(np.clip(chemistry, 0.0, 1.0))
         ph = self._safe_float(row, "ph", 7.0)
-        conductivity = self._safe_float(row, "conductivity", 100.0)  # Changed default from 0 to 100
+        conductivity = self._safe_float(row, "conductivity", 100.0)
         chemistry = self._normalise(ph, 2, 12) * 0.5 + self._normalise(conductivity, 0, 200) * 0.5
-        return float(np.clip(chemistry * 1.2 + 0.1, 0.0, 1.0))  # Boost chemistry scores
+        return float(np.clip(chemistry, 0.0, 1.0))
 
     def predict_growth(self, row: dict) -> float:
         if self.surrogates_loaded:

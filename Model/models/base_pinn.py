@@ -1,8 +1,9 @@
 """
 base_pinn.py — Base Physics-Informed Neural Network
 =====================================================
-Architecture: 4 hidden layers × 128 neurons, Tanh activation
+Architecture: 4 hidden layers × 128 neurons, Tanh + Dropout(0.1)
 Loss: L_total = λ₁·L_data + λ₂·L_physics + λ₃·L_boundary
+      + optional λ₄·L_biology + λ₅·L_ecology + λ₆·L_economics + λ₇·L_safety
 """
 
 import torch
@@ -19,12 +20,13 @@ class BasePINN(nn.Module):
     inherit from this class and override `physics_loss()`.
 
     Args:
-        input_dim  : number of input features  (default 3: x, t, T)
-        output_dim : number of outputs          (default 1: predicted quantity)
-        hidden_dim : neurons per hidden layer   (default 128, per spec)
-        lambda1    : weight for data loss       (λ₁)
-        lambda2    : weight for physics loss    (λ₂)
-        lambda3    : weight for boundary loss   (λ₃)
+        input_dim    : number of input features  (default 3: x, t, T)
+        output_dim   : number of outputs          (default 1: predicted quantity)
+        hidden_dim   : neurons per hidden layer   (default 128, per spec)
+        lambda1      : weight for data loss       (λ₁)
+        lambda2      : weight for physics loss    (λ₂)
+        lambda3      : weight for boundary loss   (λ₃)
+        dropout_p    : dropout probability for MC uncertainty estimation
     """
 
     def __init__(
@@ -35,21 +37,27 @@ class BasePINN(nn.Module):
         lambda1: float = 1.0,
         lambda2: float = 1.0,
         lambda3: float = 0.5,
+        dropout_p: float = 0.1,
     ):
         super().__init__()
 
-        # ── Network: 4 hidden layers, 128 neurons, Tanh ──────────────────
+        # ── Network: 4 hidden layers, 128 neurons, Tanh + Dropout ────────
         self.network = nn.Sequential(
             nn.Linear(input_dim, hidden_dim),
             nn.Tanh(),
+            nn.Dropout(p=dropout_p),
             nn.Linear(hidden_dim, hidden_dim),
             nn.Tanh(),
+            nn.Dropout(p=dropout_p),
             nn.Linear(hidden_dim, hidden_dim),
             nn.Tanh(),
+            nn.Dropout(p=dropout_p),
             nn.Linear(hidden_dim, hidden_dim),
             nn.Tanh(),
+            nn.Dropout(p=dropout_p),
             nn.Linear(hidden_dim, output_dim),
         )
+        self.dropout_enabled = True
 
         # ── Loss weights (learnable via AdaptiveLoss or set manually) ────
         self.lambda1 = lambda1   # data weight
@@ -72,6 +80,7 @@ class BasePINN(nn.Module):
             if isinstance(layer, nn.Linear):
                 nn.init.xavier_normal_(layer.weight)
                 nn.init.zeros_(layer.bias)
+            # Dropout and Tanh layers have no parameters — skip
 
     # ------------------------------------------------------------------ #
     #  Forward pass                                                        #
@@ -121,16 +130,20 @@ class BasePINN(nn.Module):
         x_physics: torch.Tensor,
         x_boundary: torch.Tensor,
         y_boundary: torch.Tensor,
+        extended_losses: Optional[Dict[str, Tuple]] = None,
     ) -> Tuple[torch.Tensor, Dict[str, float]]:
         """
-        Combined PINN loss:
-            L = λ₁·L_data + λ₂·L_physics + λ₃·L_boundary
+        Combined PINN loss (7-component spec):
+            L = λ₁·L_data + λ₂·L_physics + λ₃·L_boundary [+ NIST constraint]
+              + λ₄·L_biology + λ₅·L_ecology + λ₆·L_economics + λ₇·L_safety  (optional)
+
+        extended_losses: dict mapping name → (loss_tensor_or_float, weight)
+            e.g. {"biology": (bio_loss, 1.8), "safety": (safety_loss, 2.0)}
         """
         l_data     = self.data_loss(x_data, y_data)
         l_physics  = self.physics_loss(x_physics)
         l_boundary = self.boundary_loss(x_boundary, y_boundary)
-        
-        # Log constraint penalty separately
+
         x_phys_req = x_physics.clone().requires_grad_(True)
         y_phys_pred = self(x_phys_req)
         l_constraint = self.validate_nist_constraints(x_phys_req, y_phys_pred)
@@ -143,13 +156,52 @@ class BasePINN(nn.Module):
         )
 
         breakdown = {
-            "total":    total.item(),
-            "data":     l_data.item(),
-            "physics":  l_physics.item(),
-            "boundary": l_boundary.item(),
+            "total":      total.item(),
+            "data":       l_data.item(),
+            "physics":    l_physics.item(),
+            "boundary":   l_boundary.item(),
             "constraint": l_constraint.item(),
         }
+
+        # Optional extended domain losses (λ₄–λ₇)
+        if extended_losses:
+            for loss_name, (loss_val, weight) in extended_losses.items():
+                if isinstance(loss_val, torch.Tensor):
+                    total = total + weight * loss_val
+                    breakdown[loss_name] = loss_val.item()
+                else:
+                    loss_t = torch.tensor(float(loss_val), dtype=total.dtype, device=total.device)
+                    total = total + weight * loss_t
+                    breakdown[loss_name] = float(loss_val)
+            breakdown["total"] = total.item()
+
         return total, breakdown
+
+    # ------------------------------------------------------------------ #
+    #  MC Dropout uncertainty estimation                                   #
+    # ------------------------------------------------------------------ #
+    @torch.no_grad()
+    def predict_with_uncertainty(
+        self,
+        x: torch.Tensor,
+        n_samples: int = 10,
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        """
+        Monte Carlo dropout uncertainty estimation.
+
+        Runs N stochastic forward passes with dropout active, then
+        returns the mean prediction and standard deviation.
+
+        Returns:
+            pred_mean : (N_pts, output_dim) — mean prediction
+            pred_std  : (N_pts, output_dim) — uncertainty (std across samples)
+        """
+        self.train()  # Enable dropout
+        preds = torch.stack([self(x) for _ in range(n_samples)], dim=0)  # (n_samples, N, out)
+        self.eval()
+        pred_mean = preds.mean(dim=0)
+        pred_std  = preds.std(dim=0)
+        return pred_mean, pred_std
 
     # ------------------------------------------------------------------ #
     #  Training loop                                                       #
