@@ -183,9 +183,12 @@ class SrikarModelInterface:
         enriched = dict(row)
 
         def _set(key, lo, hi):
-            """Only set if the key is missing or NaN."""
+            """Only set if the key is missing or NaN. Guards against NaN bounds."""
             v = enriched.get(key)
             if v is None or (isinstance(v, float) and np.isnan(v)):
+                # Protect against NaN bounds (e.g. from NaN key_prop_x values)
+                if np.isnan(lo) or np.isnan(hi) or lo >= hi:
+                    lo, hi = 0.2, 0.8
                 enriched[key] = float(rng.uniform(lo, hi))
 
         if "bio" in domain or "protein" in tags or "cell" in tags or "gene" in tags:
@@ -214,9 +217,18 @@ class SrikarModelInterface:
         else:
             # Generic fallback — derive temperature from key_prop_1 if available
             try:
-                kp1 = float(row.get("key_prop_1") or 40.0)
+                kp1_raw = row.get("key_prop_1")
+                # Guard: NaN is truthy in Python, so "nan or 40.0" returns nan
+                if kp1_raw is None:
+                    kp1 = 40.0
+                else:
+                    kp1 = float(kp1_raw)
+                    if np.isnan(kp1) or np.isinf(kp1):
+                        kp1 = 40.0
                 base_t = kp1 * 10.0 if kp1 < 6.0 else kp1
-                _set("temperature_max", max(20.0, min(base_t + rng.uniform(-5, 5), 80.0)), 80.0)
+                t_lo = max(20.0, base_t - 5)
+                t_hi = min(80.0, base_t + 5)
+                _set("temperature_max", t_lo, t_hi)
             except Exception:
                 _set("temperature_max", 20.0, 60.0)
             _set("ph",               4.0,  10.0)
@@ -244,6 +256,8 @@ class SrikarModelInterface:
     def _normalise(self, val, lo, hi):
         if hi == lo:
             return 0.5
+        if np.isnan(val) or np.isinf(val):
+            return 0.5
         return float(np.clip((val - lo) / (hi - lo), 0.0, 1.0))
 
     def _as_tensor(self, values):
@@ -251,7 +265,11 @@ class SrikarModelInterface:
 
     def _safe_float(self, row: dict, key: str, default: float = 0.0):
         try:
-            return float(row.get(key, default))
+            v = float(row.get(key, default))
+            # NaN/Inf propagation guard — return default instead
+            if np.isnan(v) or np.isinf(v):
+                return float(default) if not np.isnan(float(default)) else 0.0
+            return v
         except Exception:
             return default
 
@@ -267,7 +285,10 @@ class SrikarModelInterface:
         """Vectorised normalise: entire array at once, output clipped to [0, 1]."""
         if hi == lo:
             return np.full(len(arr), 0.5, dtype=np.float32)
-        return np.clip((arr - lo) / (hi - lo), 0.0, 1.0).astype(np.float32)
+        out = np.clip((arr - lo) / (hi - lo), 0.0, 1.0).astype(np.float32)
+        # Replace any NaN/Inf that survived (e.g. from NaN inputs) with 0.5
+        out = np.where(np.isfinite(out), out, 0.5)
+        return out.astype(np.float32)
 
     def _features_heat(self, row: dict):
         x_position = self._normalise(self._safe_float(row, "x_position", 0.5), 0, 1)
@@ -376,7 +397,10 @@ class SrikarModelInterface:
         model = self.surrogates.get(name)
         if model is None:
             return 0.5
-        y = model.predict(np.array([features], dtype=np.float32))
+        # Final NaN/Inf guard before surrogate prediction
+        x = np.array([features], dtype=np.float32)
+        x = np.where(np.isfinite(x), x, 0.5)
+        y = model.predict(x)
         y = float(np.array(y).reshape(-1)[0])
         return float(np.clip(y, 0.0, 1.0))
 
