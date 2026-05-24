@@ -655,7 +655,280 @@ class CircadianOscillatorPINN(BasePINN):
 
 
 # ═══════════════════════════════════════════════════════════════════════
-# Registry of all 20+ growth models
+# 21 — Moser model (power-law Monod variant)
+# µ = µ_max * S^n / (Ks^n + S^n)
+# ═══════════════════════════════════════════════════════════════════════
+
+class MoserPINN(GrowthPINNBase):
+    """
+    Moser (1958) kinetics: generalised Monod with substrate exponent n.
+    Input: [time, temp_norm, substrate_norm].
+    """
+    MODEL_NAME = "moser"
+    def __init__(self, mu_max: float = 0.5, Ks: float = 0.3,
+                 n: float = 2.0, **kwargs):
+        super().__init__(input_dim=3, **kwargs)
+        self.mu_max = mu_max; self.Ks = Ks; self.n = n
+    def physics_loss(self, x):
+        x  = x.clone().requires_grad_(True)
+        N  = torch.sigmoid(self(x))
+        S  = torch.sigmoid(x[:, 2:3])
+        dN = torch.autograd.grad(N, x, torch.ones_like(N),
+                                  create_graph=True)[0][:, 0:1]
+        mu  = self.mu_max * S**self.n / (self.Ks**self.n + S**self.n + 1e-8)
+        return ((dN - mu * N * (1 - N / self.K))**2).mean()
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# 22 — Teissier model
+# µ = µ_max * (1 - exp(-S/Ks))
+# ═══════════════════════════════════════════════════════════════════════
+
+class TeissierPINN(GrowthPINNBase):
+    """
+    Teissier (1936) kinetics: exponential saturation.
+    Input: [time, temp_norm, substrate_norm].
+    """
+    MODEL_NAME = "teissier"
+    def __init__(self, mu_max: float = 0.5, Ks: float = 0.5, **kwargs):
+        super().__init__(input_dim=3, **kwargs)
+        self.mu_max = mu_max; self.Ks = Ks
+    def physics_loss(self, x):
+        x  = x.clone().requires_grad_(True)
+        N  = torch.sigmoid(self(x))
+        S  = torch.sigmoid(x[:, 2:3])
+        dN = torch.autograd.grad(N, x, torch.ones_like(N),
+                                  create_graph=True)[0][:, 0:1]
+        mu = self.mu_max * (1 - torch.exp(-S / (self.Ks + 1e-8)))
+        return ((dN - mu * N * (1 - N / self.K))**2).mean()
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# 23 — Webb model (Monod + maintenance + decay)
+# dN/dt = (µ_max·S/(Ks+S) - m) · N - kd·N
+# ═══════════════════════════════════════════════════════════════════════
+
+class WebbPINN(GrowthPINNBase):
+    """
+    Webb (1963) model: Monod growth with maintenance energy and decay.
+    Input: [time, temp_norm, substrate_norm].
+    """
+    MODEL_NAME = "webb"
+    def __init__(self, mu_max: float = 0.5, Ks: float = 0.3,
+                 m: float = 0.05, kd: float = 0.02, **kwargs):
+        super().__init__(input_dim=3, **kwargs)
+        self.mu_max = mu_max; self.Ks = Ks
+        self.m = m; self.kd = kd
+    def physics_loss(self, x):
+        x  = x.clone().requires_grad_(True)
+        N  = torch.sigmoid(self(x))
+        S  = torch.sigmoid(x[:, 2:3])
+        dN = torch.autograd.grad(N, x, torch.ones_like(N),
+                                  create_graph=True)[0][:, 0:1]
+        mu   = self.mu_max * S / (self.Ks + S + 1e-8)
+        res  = dN - (mu - self.m) * N + self.kd * N
+        return (res**2).mean()
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# 24 — Double Monod (dual-substrate limitation)
+# µ = µ_max * S1/(Ks1+S1) * S2/(Ks2+S2)
+# ═══════════════════════════════════════════════════════════════════════
+
+class DoubleMonodPINN(GrowthPINNBase):
+    """
+    Double Monod: growth limited by two substrates simultaneously.
+    Input: [time, temp_norm, S_combined_norm]  (3 features).
+    S1 = S_combined, S2 = 1 - S_combined (complementary substrates).
+    """
+    MODEL_NAME = "double_monod"
+    def __init__(self, mu_max: float = 0.5, Ks1: float = 0.3,
+                 Ks2: float = 0.2, **kwargs):
+        super().__init__(input_dim=3, **kwargs)
+        self.mu_max = mu_max; self.Ks1 = Ks1; self.Ks2 = Ks2
+    def physics_loss(self, x):
+        x  = x.clone().requires_grad_(True)
+        N  = torch.sigmoid(self(x))
+        S1 = torch.sigmoid(x[:, 2:3])
+        S2 = 1.0 - S1   # complementary substrate fraction
+        dN = torch.autograd.grad(N, x, torch.ones_like(N),
+                                  create_graph=True)[0][:, 0:1]
+        mu = (self.mu_max
+              * S1 / (self.Ks1 + S1 + 1e-8)
+              * S2 / (self.Ks2 + S2 + 1e-8))
+        return ((dN - mu * N * (1 - N / self.K))**2).mean()
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# 25 — West-Brown-Enquist (WBE) metabolic scaling
+# dW/dt = a*W^(3/4) - b*W
+# ═══════════════════════════════════════════════════════════════════════
+
+class WBEMetabolicPINN(GrowthPINNBase):
+    """
+    West-Brown-Enquist metabolic scaling (ontogenetic growth).
+    dW/dt = a * W^(3/4) - b * W
+    Input: [time, body_mass_norm, temperature_norm].
+    """
+    MODEL_NAME = "wbe_metabolic"
+    def __init__(self, a: float = 1.0, b: float = 0.1, **kwargs):
+        super().__init__(input_dim=3, **kwargs)
+        self.a = a; self.b = b
+    def physics_loss(self, x):
+        x  = x.clone().requires_grad_(True)
+        W  = torch.relu(self(x)) + 1e-6
+        dW = torch.autograd.grad(W, x, torch.ones_like(W),
+                                  create_graph=True)[0][:, 0:1]
+        res = dW - self.a * W**(0.75) + self.b * W
+        return (res**2).mean()
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# 26 — Lotka-Volterra Competition (two-species competition)
+# dN1/dt = r1*N1*(1 - (N1 + alpha12*N2)/K1)
+# dN2/dt = r2*N2*(1 - (N2 + alpha21*N1)/K2)
+# ═══════════════════════════════════════════════════════════════════════
+
+class CompetitionPINN(BasePINN):
+    """
+    Two-species Lotka-Volterra competition model.
+    Output: [N1, N2]  (competing populations).
+    Input: [time, env1_norm, env2_norm].
+    """
+    MODEL_NAME = "competition"
+    def __init__(self, r1: float = 0.5, r2: float = 0.4,
+                 K1: float = 1.0, K2: float = 1.0,
+                 a12: float = 0.3, a21: float = 0.6, **kwargs):
+        super().__init__(input_dim=3, output_dim=2, **kwargs)
+        self.r1 = r1; self.r2 = r2
+        self.K1 = K1; self.K2 = K2
+        self.a12 = a12; self.a21 = a21
+    def physics_loss(self, x):
+        x   = x.clone().requires_grad_(True)
+        out = self(x)
+        N1, N2 = torch.sigmoid(out[:, 0:1]), torch.sigmoid(out[:, 1:2])
+        def dt(f):
+            return torch.autograd.grad(f, x, torch.ones_like(f),
+                                        create_graph=True)[0][:, 0:1]
+        r1 = dt(N1) - self.r1*N1*(1 - (N1 + self.a12*N2)/self.K1)
+        r2 = dt(N2) - self.r2*N2*(1 - (N2 + self.a21*N1)/self.K2)
+        return (r1**2 + r2**2).mean()
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# 27 — Fed-batch bioreactor
+# dN/dt = (µ - D)*N    dS/dt = D*(Sin-S) - µN/Y + Feed/V
+# ═══════════════════════════════════════════════════════════════════════
+
+class FedBatchPINN(BasePINN):
+    """
+    Fed-batch bioreactor: Monod growth with substrate feed.
+    Output: [N (biomass), S (substrate)].
+    Input: [time, temp_norm, feed_rate_norm].
+    """
+    MODEL_NAME = "fed_batch"
+    def __init__(self, mu_max: float = 0.5, Ks: float = 0.3,
+                 Y: float = 0.5, Sin: float = 1.0,
+                 D: float = 0.05, **kwargs):
+        super().__init__(input_dim=3, output_dim=2, **kwargs)
+        self.mu_max = mu_max; self.Ks = Ks
+        self.Y = Y; self.Sin = Sin; self.D = D
+    def physics_loss(self, x):
+        x   = x.clone().requires_grad_(True)
+        out = self(x)
+        N   = torch.relu(out[:, 0:1]) + 1e-8
+        S   = torch.relu(out[:, 1:2]) + 1e-8
+        feed= torch.sigmoid(x[:, 2:3])
+        def dt(f):
+            return torch.autograd.grad(f, x, torch.ones_like(f),
+                                        create_graph=True)[0][:, 0:1]
+        mu  = self.mu_max * S / (self.Ks + S + 1e-8)
+        r1  = dt(N) - (mu - self.D) * N
+        r2  = dt(S) - self.D*(self.Sin - S) + mu*N/self.Y - feed
+        return (r1**2 + r2**2).mean()
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# 28 — pH-stress growth model
+# µ_eff = µ_max * f_pH(pH)    where f_pH = 1/(1 + exp(k*(pH - pH_opt)))
+# ═══════════════════════════════════════════════════════════════════════
+
+class PHStressPINN(GrowthPINNBase):
+    """
+    pH-stress inhibition of microbial growth.
+    Input: [time, temp_norm, pH_norm].
+    """
+    MODEL_NAME = "ph_stress"
+    def __init__(self, mu_max: float = 0.5, pH_opt: float = 0.7,
+                 k_pH: float = 10.0, **kwargs):
+        super().__init__(input_dim=3, **kwargs)
+        self.mu_max = mu_max; self.pH_opt = pH_opt; self.k_pH = k_pH
+    def physics_loss(self, x):
+        x  = x.clone().requires_grad_(True)
+        N  = torch.sigmoid(self(x))
+        pH = x[:, 2:3]
+        dN = torch.autograd.grad(N, x, torch.ones_like(N),
+                                  create_graph=True)[0][:, 0:1]
+        f_pH = 1.0 / (1 + torch.exp(self.k_pH * (pH - self.pH_opt)))
+        mu   = self.mu_max * f_pH
+        return ((dN - mu * N * (1 - N / self.K))**2).mean()
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# 29 — Osmotic stress model
+# µ_eff = µ_max * exp(-k_osm * max(0, aw_min - aw)^2)
+# ═══════════════════════════════════════════════════════════════════════
+
+class OsmoticStressPINN(GrowthPINNBase):
+    """
+    Osmotic stress: growth inhibited by low water activity.
+    Input: [time, temp_norm, water_activity_norm].
+    """
+    MODEL_NAME = "osmotic_stress"
+    def __init__(self, mu_max: float = 0.5, aw_min: float = 0.85,
+                 k_osm: float = 5.0, **kwargs):
+        super().__init__(input_dim=3, **kwargs)
+        self.mu_max = mu_max; self.aw_min = aw_min; self.k_osm = k_osm
+    def physics_loss(self, x):
+        x   = x.clone().requires_grad_(True)
+        N   = torch.sigmoid(self(x))
+        aw  = torch.sigmoid(x[:, 2:3])
+        dN  = torch.autograd.grad(N, x, torch.ones_like(N),
+                                   create_graph=True)[0][:, 0:1]
+        deficit = torch.relu(self.aw_min - aw)
+        mu = self.mu_max * torch.exp(-self.k_osm * deficit**2)
+        return ((dN - mu * N * (1 - N / self.K))**2).mean()
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# 30 — Seasonal / periodic growth (sinusoidal forcing)
+# dN/dt = r(t)*N*(1-N/K)   where r(t) = r_mean + A*sin(2pi*t/T)
+# ═══════════════════════════════════════════════════════════════════════
+
+class SeasonalGrowthPINN(GrowthPINNBase):
+    """
+    Seasonal logistic: intrinsic rate oscillates with a period T.
+    Input: [time (absolute days / T), temp_norm, moisture_norm].
+    """
+    MODEL_NAME = "seasonal"
+    def __init__(self, r_mean: float = 0.3, A: float = 0.15,
+                 period: float = 1.0, **kwargs):
+        super().__init__(input_dim=3, **kwargs)
+        self.r_mean = r_mean; self.A = A; self.period = period
+    def physics_loss(self, x):
+        import math
+        x  = x.clone().requires_grad_(True)
+        N  = torch.sigmoid(self(x))
+        t  = x[:, 0:1]
+        dN = torch.autograd.grad(N, x, torch.ones_like(N),
+                                  create_graph=True)[0][:, 0:1]
+        r_t = self.r_mean + self.A * torch.sin(
+            2 * math.pi * t / self.period)
+        return ((dN - r_t * N * (1 - N / self.K))**2).mean()
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# Registry of all 30+ growth models
 # ═══════════════════════════════════════════════════════════════════════
 
 GROWTH_MODEL_REGISTRY: Dict[str, type] = {
@@ -679,11 +952,25 @@ GROWTH_MODEL_REGISTRY: Dict[str, type] = {
     "lotka_volterra":    LotkaVolterraPINN,
     "allee":             AlleePINN,
     "fisher_kpp":        FisherKPPPINN,
-    # Structured
+    "competition":       CompetitionPINN,
+    # Structured / bioreactor
     "age_structured":    AgeStructuredPINN,
+    "chemostat":         ChemostatPINN,
+    "fed_batch":         FedBatchPINN,
     # Specialised
     "tumour_growth":     TumourGrowthPINN,
     "circadian":         CircadianOscillatorPINN,
+    # Additional microbial kinetics
+    "moser":             MoserPINN,
+    "teissier":          TeissierPINN,
+    "webb":              WebbPINN,
+    "double_monod":      DoubleMonodPINN,
+    # Animal / metabolic
+    "wbe_metabolic":     WBEMetabolicPINN,
+    # Environmental stress
+    "ph_stress":         PHStressPINN,
+    "osmotic_stress":    OsmoticStressPINN,
+    "seasonal":          SeasonalGrowthPINN,
 }
 
 # Alias: the default GrowthPINN used in physics_models.py is LogisticGrowthPINN
@@ -787,6 +1074,26 @@ class GrowthPINNSelector:
             return "stannard"
         if any(w in desc for w in ["ratkowsky", "sqrt", "square root"]):
             return "ratkowsky"
+        if any(w in desc for w in ["competition", "competitive exclusion", "two species"]):
+            return "competition"
+        if any(w in desc for w in ["fed batch", "fed-batch", "feeding", "bioreactor feed"]):
+            return "fed_batch"
+        if any(w in desc for w in ["moser", "power law monod", "power-law"]):
+            return "moser"
+        if any(w in desc for w in ["teissier", "exponential saturation"]):
+            return "teissier"
+        if any(w in desc for w in ["webb", "maintenance", "decay"]):
+            return "webb"
+        if any(w in desc for w in ["two substrate", "dual substrate", "double monod"]):
+            return "double_monod"
+        if any(w in desc for w in ["west brown", "west-brown", "metabolic scaling", "allometric"]):
+            return "wbe_metabolic"
+        if any(w in desc for w in ["ph stress", "acid", "alkaline", "ph inhibit"]):
+            return "ph_stress"
+        if any(w in desc for w in ["osmotic", "water activity", "salt stress", "salinity"]):
+            return "osmotic_stress"
+        if any(w in desc for w in ["seasonal", "periodic", "annual cycle", "sinusoidal"]):
+            return "seasonal"
         return "logistic"
 
 
