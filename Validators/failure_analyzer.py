@@ -100,6 +100,48 @@ class FailureAnalyzer:
         mean = sum(values) / len(values)
         return (sum((v-mean)**2 for v in values) / len(values)) ** 0.5
 
+    def _classify(self, sub: dict, overall: float):
+        """
+        Classify the root cause of failure using actual sub-scores.
+        Returns (category, confidence).
+        """
+        worst      = min(sub, key=sub.get)
+        worst_sc   = sub[worst]
+        scores     = list(sub.values())
+        std        = self._std(scores)
+        mean_sc    = sum(scores) / len(scores)
+
+        # 1. Threshold breach — overall score is close to the passing bar (≥ 0.60)
+        #    Marginal failure: one small tweak might flip it.
+        if overall >= 0.62:
+            return "threshold_breach", 0.88
+
+        # 2. Domain mismatch — high cross-domain variance means one domain is
+        #    actively conflicting with the others.
+        if std >= 0.12:
+            return "domain_mismatch", 0.82
+
+        # 3. Physics issue — physics is the weakest domain
+        if worst == "physics":
+            return "physics_issue", 0.85
+
+        # 4. Boundary issue — materials score is the weakest
+        #    (geometric / structural constraints not met)
+        if worst == "materials":
+            return "boundary_issue", 0.80
+
+        # 5. Data issue — scores are uniformly low and tightly clustered
+        #    (suggests noisy / insufficient training data across the board)
+        if std < 0.05 and mean_sc < 0.55:
+            return "data_issue", 0.75
+
+        # 6. Data issue — chemistry or biology anomaly
+        if worst in ("chemistry", "biology"):
+            return "data_issue", 0.72
+
+        # Fallback — physics is the most common failure root cause
+        return "physics_issue", 0.65
+
     def analyze(self, sim: SimulationResult) -> Optional[FailureAnalysis]:
         if sim.score >= self.PASS_THRESHOLD:
             return None
@@ -110,18 +152,19 @@ class FailureAnalyzer:
             "physics":   sim.physics_score,
             "chemistry": sim.chemistry_score,
         }
-        worst      = min(sub, key=sub.get)
-        min_score  = sub[worst]
+        worst     = min(sub, key=sub.get)
+        min_score = sub[worst]
 
-        # Always classify failed designs as physics_issue since physics scores are lowest
-        cat, conf = "physics_issue", 0.85
-        suggestions = [
-            f"Improve physics score (current: {sub['physics']:.3f})",
-            "Reduce operating temperature range",
-            "Recalibrate force boundary conditions",
-            "Apply finite element mesh refinement",
-            f"Address {worst} domain issues (score: {min_score:.3f})",
-        ]
+        cat, conf = self._classify(sub, sim.score)
+
+        # Build domain-aware suggestions
+        cat_suggestions = list(FAILURE_CATEGORIES[cat]["suggestions"])
+        domain_tip = f"Worst domain: {worst} (score: {min_score:.3f}) — focus improvements here"
+        suggestions = cat_suggestions + [domain_tip]
+        # Add a score-specific nudge for threshold breaches
+        if cat == "threshold_breach":
+            gap = self.PASS_THRESHOLD - sim.score
+            suggestions.insert(0, f"Overall score {sim.score:.3f} is only {gap:.3f} below threshold — small gain needed")
 
         return FailureAnalysis(
             design_id           = sim.design_id,
