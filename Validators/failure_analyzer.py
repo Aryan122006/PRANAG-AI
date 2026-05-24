@@ -12,45 +12,47 @@ from validator import SimulationResult
 FAILURE_CATEGORIES = {
     "physics_issue":    {
         "label": "Physics Issue",
-        "desc":  "Violates physical feasibility constraints",
+        "desc":  "Physics domain is a clear outlier — violates physical feasibility constraints",
         "suggestions": [
-            "Reduce operating temperature range",
-            "Recalibrate force boundary conditions",
-            "Apply finite element mesh refinement",
+            "Retrain the physics PINN with a wider temperature/force range",
+            "Reduce operating temperature and recalibrate force boundary conditions",
+            "Apply finite element mesh refinement on the physics sub-model",
         ]
     },
     "boundary_issue":   {
-        "label": "Boundary Condition Issue",
-        "desc":  "Exceeds geometric or spatial constraints",
+        "label": "Materials Bottleneck",
+        "desc":  "Materials domain is a clear outlier — structural or composition constraints not met",
         "suggestions": [
-            "Adjust geometric boundary parameters",
-            "Tighten spatial constraint tolerances",
-            "Validate edge-case conditions",
+            "Improve materials score: it is the single weakest domain dragging overall viability down",
+            "Review band-gap and density parameter ranges in the materials PINN",
+            "Augment materials training data with mid-range conductivity samples",
         ]
     },
     "data_issue":       {
         "label": "Data Quality Issue",
-        "desc":  "Training or simulation data is noisy/insufficient",
+        "desc":  "Chemistry or biology domain is anomalously low — likely noisy or insufficient training data",
         "suggestions": [
-            "Augment training dataset with edge cases",
-            "Apply data smoothing pipeline",
-            "Increase simulation resolution",
+            "Augment training dataset with edge cases in the flagged domain",
+            "Apply data smoothing and outlier removal to chemistry/biology inputs",
+            "Increase simulation resolution for the underperforming domain",
         ]
     },
     "domain_mismatch":  {
-        "label": "Cross-Domain Mismatch",
-        "desc":  "Conflict between domain-specific requirements",
+        "label": "Multi-Domain Conflict",
+        "desc":  "Two or more domains are simultaneously below their individual baselines",
         "suggestions": [
-            "Re-run cross-domain optimisation",
-            "Apply multi-objective Pareto optimisation",
+            "Re-run cross-domain optimisation — multiple domains are conflicting",
+            "Apply multi-objective Pareto optimisation across failing domains",
+            "Decouple domain training and retrain each PINN independently",
         ]
     },
     "threshold_breach": {
-        "label": "Threshold Breach",
-        "desc":  "Score marginally below viability threshold",
+        "label": "Marginal Threshold Breach",
+        "desc":  "Overall score is close to the 0.70 viability threshold — small improvement needed",
         "suggestions": [
-            "Tune hyperparameters near decision boundary",
-            "Apply ensemble scoring to reduce variance",
+            "Tune hyperparameters near the decision boundary",
+            "Apply ensemble scoring to reduce score variance",
+            "Target the single weakest sub-domain for a small targeted gain",
         ]
     },
 }
@@ -85,9 +87,8 @@ class FailureAnalysis:
 
 
 class FailureAnalyzer:
-    PASS_THRESHOLD      = 0.70  # Spec: viability < 0.7 → KILL
-    BOUNDARY_THRESHOLD  = 0.50
-    NOISE_THRESHOLD     = 0.15
+    PASS_THRESHOLD = 0.70   # Spec: viability < 0.7 → KILL
+    OUTLIER_GAP    = 0.15   # domain is an outlier if it's > 0.15 below the design's own mean
 
     def _severity(self, score: float) -> str:
         if score >= 0.65: return "low"
@@ -98,49 +99,53 @@ class FailureAnalyzer:
     def _std(self, values: list) -> float:
         if not values: return 0.0
         mean = sum(values) / len(values)
-        return (sum((v-mean)**2 for v in values) / len(values)) ** 0.5
+        return (sum((v - mean) ** 2 for v in values) / len(values)) ** 0.5
 
     def _classify(self, sub: dict, overall: float):
         """
-        Classify the root cause of failure using actual sub-scores.
+        Per-design outlier classification.
+        A domain is an 'outlier' only when it sits > OUTLIER_GAP below
+        this particular design's own mean score — not a global std cutoff.
         Returns (category, confidence).
         """
-        worst      = min(sub, key=sub.get)
-        worst_sc   = sub[worst]
-        scores     = list(sub.values())
-        std        = self._std(scores)
-        mean_sc    = sum(scores) / len(scores)
+        worst   = min(sub, key=sub.get)
+        scores  = list(sub.values())
+        mean_sc = sum(scores) / len(scores)
 
-        # 1. Threshold breach — overall score is close to the passing bar (≥ 0.60)
-        #    Marginal failure: one small tweak might flip it.
+        # 1. Threshold breach — overall is just below the 0.70 bar
         if overall >= 0.62:
             return "threshold_breach", 0.88
 
-        # 2. Domain mismatch — high cross-domain variance means one domain is
-        #    actively conflicting with the others.
-        if std >= 0.12:
-            return "domain_mismatch", 0.82
+        # 2. Outlier detection: which domains are significantly below
+        #    THIS design's own average (not a global threshold)?
+        outliers = [d for d, s in sub.items() if (mean_sc - s) > self.OUTLIER_GAP]
 
-        # 3. Physics issue — physics is the weakest domain
-        if worst == "physics":
-            return "physics_issue", 0.85
+        if len(outliers) == 1:
+            bottleneck = outliers[0]
+            if bottleneck == "physics":
+                return "physics_issue",  0.90
+            if bottleneck == "materials":
+                return "boundary_issue", 0.88
+            # chemistry or biology anomaly
+            return "data_issue", 0.82
 
-        # 4. Boundary issue — materials score is the weakest
-        #    (geometric / structural constraints not met)
-        if worst == "materials":
-            return "boundary_issue", 0.80
+        if len(outliers) >= 2:
+            # Genuine multi-domain conflict — two or more domains are outliers
+            return "domain_mismatch", 0.80
 
-        # 5. Data issue — scores are uniformly low and tightly clustered
-        #    (suggests noisy / insufficient training data across the board)
-        if std < 0.05 and mean_sc < 0.55:
-            return "data_issue", 0.75
-
-        # 6. Data issue — chemistry or biology anomaly
-        if worst in ("chemistry", "biology"):
+        # 3. No single outlier: all domains are close together but uniformly low
+        if mean_sc < 0.52:
             return "data_issue", 0.72
 
-        # Fallback — physics is the most common failure root cause
-        return "physics_issue", 0.65
+        # 4. Soft bottleneck — no outlier, but one domain is still the weakest
+        if worst == "physics":
+            return "physics_issue",  0.70
+        if worst == "materials":
+            return "boundary_issue", 0.68
+        if worst in ("chemistry", "biology"):
+            return "data_issue", 0.65
+
+        return "physics_issue", 0.60
 
     def analyze(self, sim: SimulationResult) -> Optional[FailureAnalysis]:
         if sim.score >= self.PASS_THRESHOLD:
@@ -159,12 +164,11 @@ class FailureAnalyzer:
 
         # Build domain-aware suggestions
         cat_suggestions = list(FAILURE_CATEGORIES[cat]["suggestions"])
-        domain_tip = f"Worst domain: {worst} (score: {min_score:.3f}) — focus improvements here"
+        domain_tip = f"Bottleneck domain: {worst} (score: {min_score:.3f}) — target this domain first"
         suggestions = cat_suggestions + [domain_tip]
-        # Add a score-specific nudge for threshold breaches
         if cat == "threshold_breach":
             gap = self.PASS_THRESHOLD - sim.score
-            suggestions.insert(0, f"Overall score {sim.score:.3f} is only {gap:.3f} below threshold — small gain needed")
+            suggestions.insert(0, f"Score {sim.score:.3f} is only {gap:.3f} below threshold — small gain in {worst} may be enough")
 
         return FailureAnalysis(
             design_id           = sim.design_id,
