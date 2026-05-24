@@ -54,9 +54,12 @@ class MultiDomainSimulator:
     def simulate_row(self, row: dict) -> MultiDomainResult:
         row = self.model._enrich_row(row)
         scores = self.model.predict_all(row)
+        # Support both entity_id (new universal_index) and trait_id (legacy)
+        tid = (row.get("entity_id") or row.get("trait_id") or f"T_{id(row)}")
+        etype = (row.get("entity_type") or row.get("domain") or "")
         return MultiDomainResult(
-            trait_id        = str(row.get("trait_id",  f"T_{id(row)}")),
-            entity_type     = str(row.get("entity_type", "")),
+            trait_id        = str(tid),
+            entity_type     = str(etype),
             biology_score   = scores["biology_score"],
             physics_score   = scores["physics_score"],
             material_score  = scores["material_score"],

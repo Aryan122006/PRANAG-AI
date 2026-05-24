@@ -26,7 +26,7 @@ def main():
     parser = argparse.ArgumentParser(description="Run complete PRANAG-AI workflow")
     parser.add_argument(
         "--data",
-        default=str(Path("Model") / "datasrc" / "real_data_combined.parquet"),
+        default=str(Path("Model") / "datasrc" / "universal_index_final.parquet"),
         help="Input parquet for Aryan pipeline",
     )
     parser.add_argument(

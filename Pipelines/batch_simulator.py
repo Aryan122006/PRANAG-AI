@@ -165,72 +165,223 @@ class SrikarModelInterface:
 
     # ── Data enrichment ───────────────────────────────────────────────────────
 
+    @staticmethod
+    def _kp(row: dict, key: str, default: float = 0.0) -> float:
+        """Parse a key_prop_x string safely, returning default on failure/NaN."""
+        try:
+            v = float(str(row.get(key, default)).strip())
+            return default if (not np.isfinite(v)) else v
+        except Exception:
+            return default
+
     def _enrich_row(self, row: dict) -> dict:
         """
-        Enrich a raw data row with derived physics features when the parquet
-        doesn't contain explicit columns like temperature_max, ph, water, etc.
+        Derive physics features from universal_index_final.parquet key_props.
 
-        Uses a hash of entity_id as a deterministic RNG seed so the same
-        entity always produces the same feature values (reproducible runs).
+        Per-domain extraction rules (from real data structure):
+          chemistry   : key_prop_1=MW(Da), key_prop_2=LogP, key_prop_3=rot_bonds
+          materials   : key_prop_1=band_gap(eV), key_prop_2=formation_energy(eV/atom),
+                        key_prop_3=density(g/cm3)
+          biology     : key_prop_1=chromosome/gene_len, key_prop_2=organism,
+                        key_prop_3=(empty)
+          physics     : key_prop_1=material_id, key_prop_2=category, key_prop_3=db
+          environment : key_prop_1=pH, key_prop_2=sand%, key_prop_3=organic_carbon(g/kg)
+
+        Falls back to deterministic RNG (entity_id hash) for any value not
+        extractable from key_props.
         """
         import hashlib
         entity_id = str(row.get("entity_id", row.get("trait_id", row.get("design_id", "default"))))
         seed = int(hashlib.md5(entity_id.encode()).hexdigest()[:8], 16)
-        rng = np.random.default_rng(seed)
+        rng  = np.random.default_rng(seed)
 
         domain = str(row.get("domain", "general")).lower()
         tags   = str(row.get("tags",   "")).lower()
+        src    = str(row.get("source", "")).lower()
+        desc   = str(row.get("description", "")).lower()
         enriched = dict(row)
 
-        def _set(key, lo, hi):
-            """Only set if the key is missing or NaN. Guards against NaN bounds."""
-            v = enriched.get(key)
-            if v is None or (isinstance(v, float) and np.isnan(v)):
-                # Protect against NaN bounds (e.g. from NaN key_prop_x values)
-                if np.isnan(lo) or np.isnan(hi) or lo >= hi:
+        def _set(k, lo, hi):
+            """Write key only when absent or NaN. Guards NaN bounds."""
+            v = enriched.get(k)
+            if v is None or (isinstance(v, float) and not np.isfinite(v)):
+                if not (np.isfinite(lo) and np.isfinite(hi) and lo < hi):
                     lo, hi = 0.2, 0.8
-                enriched[key] = float(rng.uniform(lo, hi))
+                enriched[k] = float(rng.uniform(lo, hi))
 
-        if "bio" in domain or "protein" in tags or "cell" in tags or "gene" in tags:
-            _set("temperature_max", 25.0, 45.0)   # °C — biological range
-            _set("ph",               6.0,  8.5)
-            _set("water",            0.4,  0.9)
-            _set("nitrogen",         0.3,  0.8)
-            _set("light_intensity",  0.2,  0.9)
-            _set("time",             4.0, 20.0)
-            _set("concentration",    0.2,  0.8)
+        def _put(k, val, lo_clip=None, hi_clip=None):
+            """Write a derived value (overrides if it's NaN/missing)."""
+            v = enriched.get(k)
+            if v is None or (isinstance(v, float) and not np.isfinite(v)):
+                if lo_clip is not None:
+                    val = max(lo_clip, val)
+                if hi_clip is not None:
+                    val = min(hi_clip, val)
+                enriched[k] = float(val)
+
+        # ── Chemistry (PubChem / ChEMBL)  ────────────────────────────────────
+        # key_prop_1 = MW (Da)  key_prop_2 = LogP  key_prop_3 = rot_bonds
+        if "chem" in domain or "compound" in tags or src in ("pubchem", "chembl"):
+            mw       = self._kp(row, "key_prop_1", 300.0)   # MW in Da
+            logp     = self._kp(row, "key_prop_2",   2.0)   # LogP
+            rot_bnds = self._kp(row, "key_prop_3",   3.0)   # rotatable bonds
+
+            # MW → approximate boiling/reaction temperature proxy
+            # Lipinski-style: higher MW → higher operating temperature
+            t_base = np.clip(25.0 + (mw - 100.0) * 0.06, 20.0, 150.0)
+            _put("temperature_max", t_base, 20.0, 150.0)
+            _put("temperature_k",   t_base + 273.15, 293.0, 423.0)
+
+            # LogP → polarity / pH proxy
+            # Acidic compounds (low LogP) → lower effective pH
+            ph_est = np.clip(7.0 + logp * 0.3, 2.0, 12.0)
+            _put("ph", ph_est, 2.0, 12.0)
+
+            # MW → concentration (heavier molecules → lower molar conc at 1g/L)
+            conc_est = np.clip(1.0 / (1.0 + mw / 200.0), 0.05, 0.95)
+            _put("concentration", conc_est, 0.05, 0.95)
+
+            # rot_bonds → flexibility → strain proxy
+            strain = np.clip(rot_bnds / 20.0, 0.05, 0.90)
+            _put("strain_x", strain, 0.05, 0.90)
+            _set("strain_y",          0.05,   0.90)
+            _set("water",             0.30,   0.80)
+            _set("time",              0.0,   24.0)
+
+        # ── Materials (Materials Project / AFLOW)  ────────────────────────────
+        # key_prop_1 = band_gap (eV)  key_prop_2 = formation_energy (eV/atom)
+        # key_prop_3 = density (g/cm³)
+        elif "material" in domain or "crystal" in tags or src in ("materials_project", "aflow"):
+            band_gap  = self._kp(row, "key_prop_1",  1.0)   # eV
+            form_en   = self._kp(row, "key_prop_2",  0.0)   # eV/atom (can be neg)
+            density   = self._kp(row, "key_prop_3",  5.0)   # g/cm³ (may be "N/A")
+            if density <= 0 or density > 25:
+                density = 5.0  # fallback for 'N/A' or out-of-range
+
+            # Metallic (band_gap≈0) vs insulator (band_gap>3) → temperature range
+            if band_gap < 0.1:       # metal/conductor
+                t_max = np.clip(200.0 + density * 50.0, 100.0, 1500.0)
+            elif band_gap < 2.0:     # semiconductor
+                t_max = np.clip(100.0 + density * 20.0,  50.0,  600.0)
+            else:                     # insulator / ceramic
+                t_max = np.clip( 60.0 + density * 15.0,  20.0,  400.0)
+
+            _put("temperature_max", t_max, 20.0, 1500.0)
+
+            # Density → mass-based strength proxy (denser → stronger)
+            strength_est = np.clip(density * 150.0, 100.0, 2500.0)
+            _put("strength", strength_est, 100.0, 2500.0)
+
+            # Formation energy → stability → strain tolerance
+            # More negative = more stable = lower strain to failure
+            strain_est = np.clip(0.5 - form_en * 0.05, 0.05, 0.95)
+            _put("strain_x", strain_est, 0.05, 0.95)
+            _set("strain_y",          0.05,   0.95)
+
+            # Band gap → conductivity (inverse relationship)
+            conductivity_est = np.clip(200.0 * np.exp(-band_gap * 0.8), 1.0, 200.0)
+            _put("conductivity", conductivity_est, 1.0, 200.0)
+            _set("ph",   6.5,  8.0)
+            _set("water", 0.0,  0.2)   # metals have very low water content
+            _set("time",  0.0, 24.0)
+
+        # ── Environment (OpenLandMap / SoilGrids / NASA POWER / open-meteo) ────
+        # key_prop_1 = pH  key_prop_2 = sand%  key_prop_3 = organic_carbon(g/kg)
+        elif "environment" in domain or "soil" in tags or "climate" in tags:
+            ph_soil    = self._kp(row, "key_prop_1", 6.5)   # pH
+            sand_pct   = self._kp(row, "key_prop_2", 40.0)  # sand %
+            org_carbon = self._kp(row, "key_prop_3",  1.0)  # g/kg
+
+            _put("ph",    ph_soil, 3.0, 10.0)
+
+            # Sand% → water retention (loamy=low sand → high water hold)
+            water_est = np.clip(1.0 - sand_pct / 130.0, 0.20, 0.90)
+            _put("water", water_est, 0.20, 0.90)
+
+            # Organic carbon → nitrogen proxy (SOM decomposition)
+            nitrogen_est = np.clip(org_carbon / 15.0, 0.02, 0.80)
+            _put("nitrogen", nitrogen_est, 0.02, 0.80)
+
+            # India-relevant temperature range (10-45°C)
+            _set("temperature_max", 10.0, 45.0)
+            _set("light_intensity",  0.3,  0.9)
+            _set("time",             0.0, 24.0)
+            _set("concentration",    0.1,  0.5)
+            _set("strength",       100.0, 800.0)
+
+        # ── Physics / NASA TPSX (engineering materials)  ─────────────────────
+        # key_prop_1 = material_id  key_prop_2 = category  key_prop_3 = database
+        elif "physics" in domain or "nasa" in tags or "tpsx" in tags:
+            category = str(row.get("key_prop_2", "")).lower()
+            mat_id   = self._kp(row, "key_prop_1", 500.0)  # numeric id ≈ temp proxy
+
+            # Category → operating temperature range
+            if "metal" in category or "steel" in category or "alloy" in category:
+                t_lo, t_hi = 100.0, 1200.0
+            elif "rubber" in category or "polymer" in category or "plastic" in category:
+                t_lo, t_hi =  20.0,  200.0
+            elif "ceramic" in category or "brick" in category or "oxide" in category:
+                t_lo, t_hi =  50.0,  800.0
+            elif "composite" in category or "carbon" in category:
+                t_lo, t_hi =  50.0,  600.0
+            elif "foam" in category or "insul" in category:
+                t_lo, t_hi = -50.0,  150.0
+            else:
+                t_lo, t_hi =  20.0,  500.0
+
+            # mat_id modulates within the category range (deterministic variation)
+            t_frac = np.clip((mat_id % 100) / 100.0, 0.0, 1.0)
+            t_val  = t_lo + t_frac * (t_hi - t_lo)
+            _put("temperature_max", t_val, t_lo, t_hi)
+
+            # Strength proxy from temperature class
+            str_est = np.clip(t_hi * 0.8, 100.0, 2000.0)
+            _put("strength", str_est, 100.0, 2000.0)
+            _set("strain_x",     0.01,  0.50)
+            _set("strain_y",     0.01,  0.50)
+            _set("conductivity",  1.0, 200.0)
+            _set("ph",            6.0,   8.0)
+            _set("water",         0.0,   0.1)
+            _set("time",          0.0,  24.0)
+
+        # ── Biology (UniProt / PDB proteins, NCBI genes)  ─────────────────────
+        # key_prop_1 = chromosome or gene_length  key_prop_2 = organism
+        # key_prop_3 = empty
+        elif "bio" in domain or "protein" in tags or "gene" in tags:
+            gene_len = self._kp(row, "key_prop_1", 10.0)   # chromosome/gene_id
+            organism = str(row.get("key_prop_2", "")).lower()
+
+            # Organism → temperature range
+            if "homo sapiens" in organism or "human" in organism:
+                t_lo, t_hi = 36.0, 38.0   # human body temperature
+            elif "e. coli" in organism or "escherichia" in organism:
+                t_lo, t_hi = 30.0, 42.0   # lab strain range
+            elif "thermophil" in organism or "pyro" in organism:
+                t_lo, t_hi = 60.0, 80.0   # thermophile
+            elif "plant" in organism or "arabidopsis" in organism:
+                t_lo, t_hi = 20.0, 35.0
+            elif "mus musculus" in organism or "mouse" in organism:
+                t_lo, t_hi = 36.0, 38.0
+            else:
+                t_lo, t_hi = 25.0, 45.0   # general biological range
+
+            _set("temperature_max", t_lo, t_hi)
+
+            # Gene length → complexity proxy → water / metabolic demand
+            len_norm = np.clip(gene_len / 30.0, 0.0, 1.0)
+            _put("water",    0.4 + len_norm * 0.3, 0.40, 0.90)
+            _put("nitrogen", 0.3 + len_norm * 0.4, 0.30, 0.80)
+            _set("ph",               7.0,   7.8)
+            _set("light_intensity",  0.2,   0.9)
+            _set("concentration",    0.2,   0.8)
             _set("strength",       400.0, 1600.0)
-        elif "material" in domain or "alloy" in tags or "metal" in tags:
-            _set("temperature_max",  20.0,  200.0)
-            _set("strain_x",          0.05,   0.9)
-            _set("strain_y",          0.05,   0.9)
-            _set("strength",        200.0, 2000.0)
-            _set("conductivity",     50.0,  200.0)
-            _set("ph",                6.5,    8.0)
-            _set("time",              0.0,   24.0)
-        elif "chem" in domain or "reaction" in tags or "compound" in tags:
-            _set("temperature_max",  30.0,   90.0)
-            _set("temperature_k",   303.0,  363.0)
-            _set("concentration",     0.1,    0.9)
-            _set("ph",                3.0,   11.0)
-            _set("time",              0.0,   24.0)
+            _set("time",             4.0,  20.0)
+
+        # ── Generic fallback  ─────────────────────────────────────────────────
         else:
-            # Generic fallback — derive temperature from key_prop_1 if available
-            try:
-                kp1_raw = row.get("key_prop_1")
-                # Guard: NaN is truthy in Python, so "nan or 40.0" returns nan
-                if kp1_raw is None:
-                    kp1 = 40.0
-                else:
-                    kp1 = float(kp1_raw)
-                    if np.isnan(kp1) or np.isinf(kp1):
-                        kp1 = 40.0
-                base_t = kp1 * 10.0 if kp1 < 6.0 else kp1
-                t_lo = max(20.0, base_t - 5)
-                t_hi = min(80.0, base_t + 5)
-                _set("temperature_max", t_lo, t_hi)
-            except Exception:
-                _set("temperature_max", 20.0, 60.0)
+            kp1 = self._kp(row, "key_prop_1", 40.0)
+            base_t = float(np.clip(kp1 * 10.0 if kp1 < 6.0 else kp1, 20.0, 80.0))
+            _set("temperature_max", max(20.0, base_t - 5), min(80.0, base_t + 5))
             _set("ph",               4.0,  10.0)
             _set("water",            0.3,   0.9)
             _set("nitrogen",         0.2,   0.7)
@@ -241,6 +392,7 @@ class SrikarModelInterface:
             _set("conductivity",    10.0,  200.0)
             _set("strain_x",         0.1,   0.8)
             _set("strain_y",         0.1,   0.8)
+
         return enriched
 
     def _enrich_dataframe(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -652,9 +804,26 @@ class BatchSimulator:
                 return df[col].fillna("").astype(str).values
             return np.array([f"{fallback_prefix}{i}" for i in range(n)])
 
+        # Use entity_id (new universal_index) or trait_id (legacy) as identifier
+        if "entity_id" in df.columns and "trait_id" not in df.columns:
+            trait_ids = _str_col("entity_id", "T")
+        else:
+            trait_ids = _str_col("trait_id", "T")
+            if all(t.startswith("T") and t[1:].isdigit() for t in trait_ids[:5]):
+                # Auto-generated fallback — prefer entity_id if available
+                entity_ids = _str_col("entity_id", "")
+                if any(e for e in entity_ids[:5]):
+                    trait_ids = entity_ids
+
+        # entity_type: use domain column if entity_type not present
+        if "entity_type" not in df.columns and "domain" in df.columns:
+            entity_types = _str_col("domain", "")
+        else:
+            entity_types = _str_col("entity_type", "")
+
         return pd.DataFrame({
-            "trait_id":        _str_col("trait_id",    "T"),
-            "entity_type":     _str_col("entity_type", ""),
+            "trait_id":        trait_ids,
+            "entity_type":     entity_types,
             "source":          _str_col("source",      ""),
             "viability_score": scores["viability_score"].values,
             "biology_score":   scores["biology_score"].values,

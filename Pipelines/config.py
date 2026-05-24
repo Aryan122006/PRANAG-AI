@@ -38,7 +38,7 @@ MODEL_FILES = {
 # From data curators team
 
 PARQUET_FILES = {
-    "main":       os.path.join(DATA_DIR, "real_data_combined.parquet"),
+    "main":       os.path.join(DATA_DIR, "universal_index_final.parquet"),  # updated
     "materials":  os.path.join(DATA_DIR, "aflow_materials.parquet"),
     "molecules":  os.path.join(DATA_DIR, "chembl_compounds.parquet"),
     "proteins":   os.path.join(DATA_DIR, "pdb_proteins.parquet"),
