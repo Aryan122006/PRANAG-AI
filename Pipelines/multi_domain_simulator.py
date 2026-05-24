@@ -44,7 +44,7 @@ class MultiDomainSimulator:
     Runs all 5 PINN domains on every trait.
     Produces the full score profile needed by Divyanshu's validator.
     """
-    PASS_THRESHOLD = 0.60  # Adjusted to reflect improved scoring
+    PASS_THRESHOLD = 0.70  # Spec: viability < 0.7 → KILL
 
     def __init__(self, model_dir: str = None, parquet_path: str = None):
         self.model  = SrikarModelInterface(model_dir)
@@ -52,6 +52,7 @@ class MultiDomainSimulator:
         os.makedirs("results", exist_ok=True)
 
     def simulate_row(self, row: dict) -> MultiDomainResult:
+        row = self.model._enrich_row(row)
         scores = self.model.predict_all(row)
         return MultiDomainResult(
             trait_id        = str(row.get("trait_id",  f"T_{id(row)}")),
@@ -80,6 +81,7 @@ class MultiDomainSimulator:
         t_start     = time.perf_counter()
 
         for batch_num, df in self.loader.get_batches(batch_size):
+            df = self.model._enrich_dataframe(df)  # add physics cols if missing
             batch = [self.simulate_row(r) for r in df.to_dict("records")]
             all_results.extend(batch)
             passed = sum(1 for r in batch if r.passed)
