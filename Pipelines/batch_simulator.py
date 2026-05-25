@@ -49,19 +49,24 @@ class TraitResult:
 
 class SrikarModelInterface:
     """
-    Interface to Srikar's PINN models.
-    When Srikar hands over his models, replace the _mock_* methods
-    with real model.predict() calls.
+    Scoring interface — wraps three backends in priority order:
 
-    HOW TO PLUG IN:
-        1. Replace `self.models` loading with:
-               import torch
-               self.heat_model    = torch.load(model_dir + "heat_pinn.pt")
-               self.stress_model  = torch.load(model_dir + "stress_pinn.pt")
-               self.growth_model  = torch.load(model_dir + "growth_pinn.pt")
-               self.biology_model = torch.load(model_dir + "biology_pinn.pt")
-               self.chem_model    = torch.load(model_dir + "chemistry_pinn.pt")
-        2. Replace each _predict_* method with real model inference.
+      1. GBM surrogates  (surrogates_loaded=True)
+         sklearn GBMs in Model/outputs/surrogates/*.joblib.
+         Trained to approximate PINN outputs; used in normal production runs
+         because they are ~100x faster than raw PINN inference.
+         THIS IS WHAT RUNS IN PRACTICE when the surrogate files are present.
+
+      2. PyTorch PINNs  (models_loaded=True, surrogates absent)
+         Actual PINN checkpoints in Model/outputs/models/*.pt.
+         Used only when no surrogate files are found.
+
+      3. Numpy fallback  (neither loaded)
+         Simple formula-based approximation — no ML models at all.
+
+    Both surrogate and PINN files are typically present, but surrogates
+    always win (priority 1). The PINN weights are loaded into RAM as a
+    fallback but are never called while surrogates are available.
     """
 
     def __init__(self, model_dir: str = None):
@@ -625,7 +630,9 @@ class SrikarModelInterface:
         return self._normalise(temp, 0, 1500) * 0.5 + self._normalise(ph, 2, 12) * 0.5
 
     def predict_all(self, row: dict) -> dict:
-        """Run all 5 PINNs on a single trait row."""
+        """Score one trait row across all 5 domains.
+        Uses GBM surrogates if loaded, PyTorch PINNs as fallback,
+        then numpy formulas if neither is available."""
         bio  = self.predict_biology(row)
         phy  = self.predict_physics(row)
         mat  = self.predict_material(row)

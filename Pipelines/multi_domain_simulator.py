@@ -1,8 +1,21 @@
 """
 multi_domain_simulator.py  —  ARYAN  (Task 5)
-Runs traits through ALL 5 PINNs and outputs domain-level scores.
+Scores every trait across 5 domains and outputs domain-level scores.
 Output per trait: biology_score, physics_score, material_score,
                   chemistry_score, overall_score.
+
+SCORING BACKEND (priority order, decided at runtime by SrikarModelInterface):
+  1. Surrogate models  — sklearn GBMs trained to approximate PINN outputs
+                         (.joblib files in Model/outputs/surrogates/).
+                         Used when all 5 surrogate files are present.
+                         This is the NORMAL production path (fast, ~1M/4hr).
+  2. PINN checkpoints  — actual PyTorch PINNs (.pt files in Model/outputs/models/).
+                         Used only when surrogates are missing.
+  3. Numpy fallback    — simple formula-based approximation.
+                         Used when neither surrogates nor PINN weights are found.
+
+In typical runs BOTH surrogate and PINN files are present, but surrogates
+always take priority (they are intentionally preferred for throughput).
 """
 
 import pandas as pd
@@ -41,8 +54,14 @@ class MultiDomainResult:
 
 class MultiDomainSimulator:
     """
-    Runs all 5 PINN domains on every trait.
-    Produces the full score profile needed by Divyanshu's validator.
+    Scores every trait across 5 domains (biology, physics, materials,
+    chemistry, growth) and produces the full score profile needed by
+    Divyanshu's validator.
+
+    The actual scoring engine is decided by SrikarModelInterface at init:
+      - surrogates_loaded=True  → sklearn GBM surrogates (normal path)
+      - models_loaded=True only → PyTorch PINN checkpoints (fallback)
+      - neither                 → numpy formula fallback
     """
     PASS_THRESHOLD = 0.70  # Spec: viability < 0.7 → KILL
 
@@ -50,6 +69,15 @@ class MultiDomainSimulator:
         self.model  = SrikarModelInterface(model_dir)
         self.loader = DataLoader(parquet_path)
         os.makedirs("results", exist_ok=True)
+
+        # Log which backend is actually active so there's no ambiguity
+        if self.model.surrogates_loaded:
+            backend = "GBM surrogates  (PINN approximations, fast)"
+        elif self.model.models_loaded:
+            backend = "PyTorch PINNs   (exact, slower)"
+        else:
+            backend = "numpy fallback  (no models found)"
+        print(f"   Scoring backend : {backend}")
 
     def simulate_row(self, row: dict) -> MultiDomainResult:
         row = self.model._enrich_row(row)
@@ -73,11 +101,11 @@ class MultiDomainSimulator:
         )
 
     def run(self, batch_size: int = 5000) -> pd.DataFrame:
-        """Run multi-domain simulation and save output parquet."""
+        """Score all traits across 5 domains and save output parquet."""
         total = self.loader.count()
-        print(f"\n🔬 Multi-Domain Simulation")
+        print(f"\n🔬 Multi-Domain Scoring")
         print(f"   Traits  : {total:,}")
-        print(f"   Domains : Heat · Stress · Growth · Biology · Chemistry")
+        print(f"   Domains : Biology · Physics · Materials · Chemistry · Growth")
         print(f"{'─'*52}")
 
         all_results = []
